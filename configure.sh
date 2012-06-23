@@ -13,6 +13,26 @@ Csources=$(find . |grep -v git | grep '\.c$' | sed 's/^\..*\///g')
 Ssources=$(find . |grep -v git | grep '\.s$' | sed 's/^\..*\///g')
 ######################全局变量######################################
 dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
+######################定义项目名称######################################
+flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
+while [ "$flag" != "0" ];do
+dialog --clear
+dialog --title "指令集版本选择" --inputbox "请输入你当前使用项目名称。为空时，会默认为Myarm.\n" 20 50  2> $temp_file
+
+proj_name=$(cat $temp_file)
+flag=0
+if [ -z "$proj_name" ];then
+dialog --title "再次确认" --yesno "你将会使用默认的项目名称，你确定要这样做吗？" 10 30
+flag=$?
+if [ "$flag" = "0" ];then
+proj_name=Myarm
+echo "proj_name=$proj_name" > configure.mk
+fi
+else 
+echo "proj_name=$proj_name" > configure.mk
+fi
+done
+######################定义项目名称######################################
 #################交叉编译器版本选择#####################################
 cross_item_num=2
 cross_item='1 arm-none-eabi 2 arm-uclinuxeabi'
@@ -27,10 +47,10 @@ done
 
 cross_select=$(cat $temp_file)
 if [ "$cross_select" = "1" ];then
-echo "CROSS_COMPILER=arm-none-eabi-" > configure.mk
+echo "CROSS_COMPILER=arm-none-eabi-" >> configure.mk
 cross_select=arm-none-eabi
 elif [ "$cross_select" = "2" ];then
-echo "CROSS_COMPILER=arm-uclinuxeabi-" > configure.mk
+echo "CROSS_COMPILER=arm-uclinuxeabi-" >> configure.mk
 cross_select=arm-uclinuxeabi
 fi
 #################交叉编译器版本选择#####################################
@@ -108,6 +128,7 @@ obj_dir=$(cat $temp_file)
 if [ -z "$obj_dir" ];then
 dialog --title "再次确认" --yesno "bin文件跟反汇编文件将在根目录上，你确定要这样做吗？" 10 30 
 flag=$?
+obj_dir=.
 else
 mkdir -p $obj_dir
 flag=0
@@ -126,6 +147,7 @@ depend_dir=$(cat $temp_file)
 if [ -z "$depend_dir" ];then
 dialog --title "再次确认" --yesno "自动生成的依赖文件文件将在根目录上，你确定要这样做吗？" 10 30 
 flag=$?
+depend_dir=.
 else
 mkdir -p $depend_dir
 flag=0
@@ -175,20 +197,20 @@ case $cpu_select in
   "cortex-m3" )
       echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
       echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
-      echo 'LD_FLAGS += -Tcortex-m3.lds' >> configure.mk
+      echo 'LD_FLAGS += -T$(obj_dir)/$(CPU).lds' >> configure.mk
       CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
-      LD_FLAGS="$LD_FLAGS -Tcortex-m3.lds"
-      cp -rf $LDS_BAK/cortex-m3.lds.bak.txt $obj_dir/cortex-m3.lds
+      LD_FLAGS="$LD_FLAGS -T$obj_dir/$cpu_select.lds"
+      cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $obj_dir/$cpu_select.lds
       ;;
   "cortex-a8" )
       echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
       echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
-      echo 'LD_FLAGS += -Tcortex-a8.lds' >> configure.mk
+      echo 'LD_FLAGS += -T$(obj_dir)//$(CPU).lds' >> configure.mk
       CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
-      LD_FLAGS="$LD_FLAGS -Tcortex-a8.lds"
-      cp -rf $LDS_BAK/cortex-a8.lds.bak.txt $obj_dir/cortex-a8.lds
+      LD_FLAGS="$LD_FLAGS -T$obj_dir/$cpu_select.lds"
+      cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $obj_dir/$cpu_select.lds
       ;;
   *) 
     echo "cpu选型有误，与指令集版本不匹配，请重新配置一次。"
@@ -202,11 +224,11 @@ case $cpu_select in
   "arm920t" )
       echo 'CFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> configure.mk
       echo 'ASFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> configure.mk
-      echo 'LD_FLAGS = -Tarmv4t.lds' >> configure.mk
+      echo 'LD_FLAGS = -T$(obj_dir)/$(CPU).lds' >> configure.mk
       CFLAGS="$CFLAGS -march=$arch_select -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mcpu=$cpu_select"
-      LD_FLAGS="$LD_FLAGS -Tarm920t.lds"
-      cp -rf $LDS_BAK/arm920t.lds.bak.txt $obj_dir/arm920t.lds
+      LD_FLAGS="$LD_FLAGS -T$obj_dir/$cpu_select.lds"
+      cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $obj_dir/$cpu_select.lds
       ;;
   *) 
     echo "cpu选型有误，与指令集版本不匹配，请重新配置一次。"
@@ -219,6 +241,7 @@ fi
 echo "RM=rm -rf">> configure.mk
 
 echo "配置完成。"
+echo "项目名称：$proj_name"
 echo "指令集:$arch_select"
 echo "CPU内核版本:$cpu_select"
 echo "CC工具为${cross_select}-gcc "
