@@ -8,6 +8,7 @@ cross_select= #编译器类型存储
 arch_select= #指令集选型
 cpu_select= #CPU内核选型
 obj_dir= #可执行文件，与反汇编文件所在
+LDS_BAK=lds_bak #链接脚本备份文件所在的文件夹
 Csources=$(find . |grep -v git | grep '\.c$' | sed 's/^\..*\///g')
 Ssources=$(find . |grep -v git | grep '\.s$' | sed 's/^\..*\///g')
 ######################全局变量######################################
@@ -137,23 +138,17 @@ done
 clear
 ####################项目的源码目录汇总###################################
 sum_dir=$(find . -type d | grep -v git )
-echo "配置VPATH搜索路径，VPATH值为"
-echo "$sum_dir"
 sum_dir=$(echo -n $sum_dir) #将所有行连接在一起，并使他们在同一行
 echo "VPATH=$sum_dir" >> configure.mk
 echo "GPATH=$sum_dir" >> configure.mk
 ####################项目的源码目录汇总###################################
 ####################编译环境配置###################################
+echo "编译环境配置开始"
 #*******************工具配置********************************************
-echo "CC工具为${cross_select}-gcc "
 echo "CC=${cross_select}-gcc" >> configure.mk
-echo "LD工具为${cross_select}-ld "
 echo "LD=${cross_select}-ld" >> configure.mk
-echo "OBJCOPY工具为${cross_select}-objcopy "
 echo "OBJCOPY=${cross_select}-objcopy" >> configure.mk
-echo "OBJDUMP工具为${cross_select}-objdump "
 echo "OBJDUMP=${cross_select}-objdump" >> configure.mk
-echo "AS工具为${cross_select}-gcc "
 echo "AS=${cross_select}-gcc" >> configure.mk
 #*******************工具配置********************************************
 #*******************工具选项配置******************************************
@@ -184,6 +179,7 @@ case $cpu_select in
       CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       LD_FLAGS="$LD_FLAGS -Tcortex-m3.lds"
+      cp -rf $LDS_BAK/cortex-m3.lds.bak.txt $obj_dir/cortex-m3.lds
       ;;
   "cortex-a8" )
       echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
@@ -192,6 +188,7 @@ case $cpu_select in
       CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       LD_FLAGS="$LD_FLAGS -Tcortex-a8.lds"
+      cp -rf $LDS_BAK/cortex-a8.lds.bak.txt $obj_dir/cortex-a8.lds
       ;;
   *) 
     echo "cpu选型有误，与指令集版本不匹配，请重新配置一次。"
@@ -209,6 +206,7 @@ case $cpu_select in
       CFLAGS="$CFLAGS -march=$arch_select -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mcpu=$cpu_select"
       LD_FLAGS="$LD_FLAGS -Tarm920t.lds"
+      cp -rf $LDS_BAK/arm920t.lds.bak.txt $obj_dir/arm920t.lds
       ;;
   *) 
     echo "cpu选型有误，与指令集版本不匹配，请重新配置一次。"
@@ -221,11 +219,21 @@ fi
 echo "RM=rm -rf">> configure.mk
 
 echo "配置完成。"
+echo "指令集:$arch_select"
+echo "CPU内核版本:$cpu_select"
+echo "CC工具为${cross_select}-gcc "
+echo "LD工具为${cross_select}-ld "
+echo "OBJCOPY工具为${cross_select}-objcopy "
+echo "OBJDUMP工具为${cross_select}-objdump "
+echo "AS工具为${cross_select}-gcc "
 echo "CC的选项为$CFLAGS"
 echo "AS的选项为$ASFLAGS"
 echo "LD的选项为$LD_FLAGS"
 echo "OBJCOPY的选项为$OBJCOPY_FLAGS"
 echo "OBJDUMP的选项为$OBJDUMP_FLAGS"
+echo "bin文件跟反汇编文件将在$obj_dir/目录中"
+echo "自动生成的依赖文件文件在$depend_dir/目录上"
+echo "项目的所有目录(VPATH和GPATH的值) ： $sum_dir"
 #*******************工具选项配置******************************************
 ####################编译环境配置###################################
 

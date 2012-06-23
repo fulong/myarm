@@ -8,9 +8,9 @@
  *  compiler:GCC\n
  *  \date       May 22, 2012 2:40:36 PM
  */
-
+#include "spi.h"
 void spi_io_configure(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
+//	GPIO_InitTypeDef GPIO_InitStructure;
 
 }

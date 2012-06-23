@@ -1,3 +1,10 @@
+使用方法：
+	1.编译前，运行configure.sh脚本
+	2.make all
+	3.make install
+当想清理项目时：
+	1.make clean  是清掉O文件
+	2.make distclean 清掉会自动生成的文件
 目录：(+:代表文件，-:代表文件夹)
 --------package  这个的存在是为了将功能层与驱动层区分起来
 	+tft.c
