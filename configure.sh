@@ -8,8 +8,9 @@ cross_select= #编译器类型存储
 arch_select= #指令集选型
 cpu_select= #CPU内核选型
 obj_dir= #可执行文件，与反汇编文件所在
+Csources=$(find . |grep -v git | grep '\.c$' | sed 's/^\..*\///g')
+Ssources=$(find . |grep -v git | grep '\.s$' | sed 's/^\..*\///g')
 ######################全局变量######################################
-
 dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
 #################交叉编译器版本选择#####################################
 cross_item_num=2
@@ -32,6 +33,10 @@ echo "CROSS_COMPILER=arm-uclinuxeabi-" > configure.mk
 cross_select=arm-uclinuxeabi
 fi
 #################交叉编译器版本选择#####################################
+Csources=$(echo -n $Csources)
+echo "Csources=$Csources" >>configure.mk
+Ssources=$(echo -n $Ssources)
+echo "Ssources=$Ssources" >>configure.mk
 ####################指令集版本选择####################################
 #Permissible names are: `armv2', `armv2a', `armv3', `armv3m', 
 #`armv4', `armv4t', `armv5', `armv5t', `armv5e', `armv5te', `armv6', `armv6j', `armv6t2', `armv6z', `armv6zk', `armv6-m',
@@ -76,12 +81,12 @@ flag=$?
 elif [ "$cpu_select" != "arm920t" ] && [ "$cpu_select" != "cortex-a8" ] && [ "$cpu_select" != "cortex-m3" ] ;then
 dialog --title "你可以选择的CPU内核版本(目前支持),请输入正确的CPU内核版本名称"  --msgbox "$CPU_VAR" 20 50
 flag=1
-fi
-if [ "$arch_select" = "" ];then
+if [ "$arch_select" = "" ] && [ "$flag" = "0" ];then
     dialog  --msgbox "cpu选型有误，与指令集版本不能不同时为空，请重新配置一次。" 20 50
     rm configure.mk
     clear
     exit 0
+fi
 fi
 done
 
@@ -93,12 +98,11 @@ if [ "$arch_select" != "" ] && [ "$cpu_select" = "" ];then
     clear
     exit 0
 fi
-
-####################o文件输出的路径####################################
+####################生成的bin文件跟反汇编文件所在的路径####################################
 #这里所需要的O文件都是中间文件，所以到最后，这些都将在编译成功后删除掉。
 flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
 while [ "$flag" != "0" ];do
-dialog --title "设置O文件输出的路径" --inputbox "请输入O文件的链接路径，这路径也是链接脚本所在的位置。最终链接生成的bin文件跟反汇编文件将会移动到这个路径中。格式为:./home/" 20 50  2> $temp_file
+dialog --title "设置O文件输出的路径" --inputbox "请输入O文件的链接路径，这路径也是链接脚本所在的位置。最终链接生成的bin文件跟反汇编文件将会移动到这个路径中。格式为:obj_dir" 20 50  2> $temp_file
 obj_dir=$(cat $temp_file)
 if [ -z "$obj_dir" ];then
 dialog --title "再次确认" --yesno "bin文件跟反汇编文件将在根目录上，你确定要这样做吗？" 10 30 
@@ -111,7 +115,25 @@ if [ "$flag" = "0" ];then
 echo "obj_dir=$obj_dir" >> configure.mk
 fi
 done
-####################o文件输出的路径####################################
+###################生成的bin文件跟反汇编文件所在的路径####################################
+####################自动生成的依赖文件文件所在的路径####################################
+#
+flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
+while [ "$flag" != "0" ];do
+dialog --title "设置自动生成的依赖文件文件所在的路径" --inputbox "自动生成的依赖文件文件所在的路径,格式为:depend" 20 50  2> $temp_file
+depend_dir=$(cat $temp_file)
+if [ -z "$depend_dir" ];then
+dialog --title "再次确认" --yesno "自动生成的依赖文件文件将在根目录上，你确定要这样做吗？" 10 30 
+flag=$?
+else
+mkdir -p $depend_dir
+flag=0
+fi
+if [ "$flag" = "0" ];then
+echo "depend_dir=$depend_dir" >> configure.mk
+fi
+done
+####################自动生成的依赖文件文件所在的路径####################################
 clear
 ####################项目的源码目录汇总###################################
 sum_dir=$(find . -type d | grep -v git )
@@ -119,6 +141,7 @@ echo "配置VPATH搜索路径，VPATH值为"
 echo "$sum_dir"
 sum_dir=$(echo -n $sum_dir) #将所有行连接在一起，并使他们在同一行
 echo "VPATH=$sum_dir" >> configure.mk
+echo "GPATH=$sum_dir" >> configure.mk
 ####################项目的源码目录汇总###################################
 ####################编译环境配置###################################
 #*******************工具配置********************************************
@@ -146,10 +169,10 @@ echo 'LD_FLAGS = --gc-sections ' >> configure.mk
 echo 'OBJCOPY_FLAGS = -O binary -S' >> configure.mk
 echo 'OBJDUMP_FLAGS = -D -m arm' >> configure.mk
 if [ "$cross_select" = "arm-uclinuxeabi" ] || [ "$cpu_select" != "cortex-m3" ];then
-echo 'CFLAGS += -02' >> configure.mk
-echo 'ASFLAGS += -02' >> configure.mk
-CFLAGS="$CFLAGS -02"
-ASFLAGS="$ASFLAGS -02"
+echo 'CFLAGS += -O2' >> configure.mk
+echo 'ASFLAGS += -O2' >> configure.mk
+CFLAGS="$CFLAGS -O2"
+ASFLAGS="$ASFLAGS -O2"
 fi
 
 if [ "$arch_select" = "armv7-m" ];then
@@ -194,6 +217,9 @@ case $cpu_select in
     ;;
 esac
 fi
+
+echo "RM=rm -rf">> configure.mk
+
 echo "配置完成。"
 echo "CC的选项为$CFLAGS"
 echo "AS的选项为$ASFLAGS"
