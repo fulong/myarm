@@ -1,4 +1,4 @@
-.include "start_code/startup_stm32f10x_hd.mem.inc"
+.include "start_code/mem.inc"
 /**
   ******************************************************************************
   * @file      startup_stm32f10x_hd.s
