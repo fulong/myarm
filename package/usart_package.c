@@ -9,7 +9,7 @@
  *  \date      Apr 23, 2012 6:06:29 PM
  */
 
-#include "../sysdev/usart.h"
+#include "../sysdev/cortex-m3/cortex-m3_inc/usart.h"
 #include "../libc/libmath.h"
 #include "usart_package.h"
 #ifdef __DEBUG__

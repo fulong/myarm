@@ -16,7 +16,7 @@
 #define LED_H_
 
 #define __LED_H__
-#include "../stm32f103/STM32F10x/stm32f10x.h"
+#include "../../../cpu/stm32f103/STM32F10x/stm32f10x.h"
 #include "sys.h"
 
 #define LED1            PDout(6) /**< @brief  控制PD6口的输出，赋值1则输出高电平，0则为低电平*/

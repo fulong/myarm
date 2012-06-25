@@ -15,7 +15,7 @@
 #ifndef INTERRUPT_H_
 #define INTERRUPT_H_
 
-#include "../stm32f103/STM32F10x/stm32f10x.h"
+#include "../../../cpu/stm32f103/STM32F10x/stm32f10x.h"
 
 extern INT8U* TX_buf_bp;
 extern INT8U TX_buf[64];

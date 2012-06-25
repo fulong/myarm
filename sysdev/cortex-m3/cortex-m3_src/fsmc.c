@@ -1,4 +1,4 @@
-#include "fsmc.h"
+#include "../cortex-m3_inc/fsmc.h"
 /* --------------------- FSMC registers bit mask ---------------------------- */
 
 /* FSMC BCRx Mask */

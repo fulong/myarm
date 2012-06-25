@@ -11,7 +11,7 @@
  *  compiler:GCC\n
  *  \date      Apr 24, 2012 2:39:58 PM
  */
-#include "interrupt.h"
+#include "../cortex-m3_inc/interrupt.h"
 INT32U second = 0;
 extern INT8U USART_length;
 

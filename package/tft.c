@@ -1,7 +1,7 @@
 #include "tft.h"
-#include "../sysdev/gpio.h"
-#include "../sysdev/rcc.h"
-#include "../sysdev/fsmc.h"
+#include "../sysdev/cortex-m3/cortex-m3_inc/gpio.h"
+#include "../sysdev/cortex-m3/cortex-m3_inc/rcc.h"
+#include "../sysdev/cortex-m3/cortex-m3_inc/fsmc.h"
 #include "../chip/ssd1963.h"
 #include "../libc/font.h"
 #ifdef __DEBUG__

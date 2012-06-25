@@ -1,5 +1,5 @@
 #include "ssd1963.h"
-#include "../sysdev/systick.h"
+#include "../sysdev/cortex-m3/cortex-m3_inc/systick.h"
 #include "../package/usart_package.h"
 /**
  *  \file	ssd1963.c

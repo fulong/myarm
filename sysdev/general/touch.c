@@ -8,9 +8,9 @@
  *  compiler:GCC\n
  *  \date       2012-5-21 下午5:24:41
  */
-#include "touch.h"
+#include "../cortex-m3_inc/touch.h"
 #include "../chip/tsc2046.h"
-#include "sys.h"
+#include "../cortex-m3_inc/sys.h"
 #ifdef __DEBUG__
 #include "../package/usart_package.h"
 #endif

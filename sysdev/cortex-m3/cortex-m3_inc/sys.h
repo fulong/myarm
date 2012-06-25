@@ -13,7 +13,7 @@
 #ifndef SYS_H_
 #define SYS_H_
 
-#include "../stm32f103/STM32F10x/stm32f10x.h"
+#include "../../../cpu/stm32f103/STM32F10x/stm32f10x.h"
 
 
 /** @brief IO口映射到位地址的存储地址*/
