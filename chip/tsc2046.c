@@ -9,9 +9,9 @@
  *  \date       2012-5-23 上午9:25:12
  */
 #include "tsc2046.h"
-#include "../sysdev/cortex-m3/cortex-m3_inc/gpio.h"
-#include "../sysdev/cortex-m3/cortex-m3_inc/rcc.h"
-#include "../sysdev/cortex-m3/cortex-m3_inc/sys.h"
+#include "../sysdev/cortex-m3/inc/gpio.h"
+#include "../sysdev/cortex-m3/inc/rcc.h"
+#include "../sysdev/cortex-m3/inc/sys.h"
 
 #define TP_CS					PCout(1)
 #define SPI_SCK					PBout(13)

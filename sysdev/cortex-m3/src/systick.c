@@ -1,4 +1,4 @@
-#include "../cortex-m3_inc/systick.h"
+#include "../inc/systick.h"
 /**
  *  \file	systick.c
  *  \brief      
