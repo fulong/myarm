@@ -1,5 +1,5 @@
-#include "../cortex-m3_inc/usart.h"
-#include "../cortex-m3_inc/rcc.h"
+#include "../cortex-m3/cortex-m3_inc/usart.h"
+#include "../cortex-m3/cortex-m3_inc/rcc.h"
 /* �������� --------------------------------------------------------------*/
 /* ���ö��� --------------------------------------------------------------*/
 

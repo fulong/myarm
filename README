@@ -1,10 +1,22 @@
+使用环境：
+	OS：Fedora 17
+	IDE:Eclipse 4.2
+	Eclipse plugin:Update Site
+		git:  http://download.eclipse.org/egit/update
+		arm:  http://gnuarmeclipse.sourceforge.net/updates
+		vrapper:	http://vrapper.sourceforge.net/update-site/stable (eclipse 的一个中 vim 插件)
+		zylin:		http://opensource.zylin.com/zylincdt
+		
 使用方法：
-	1.编译前，运行configure.sh脚本
+	1.编译前，运行configure.sh脚本,make configure
 	2.make all
 	3.make install
 当想清理项目时：
 	1.make clean  是清掉O文件
 	2.make distclean 清掉会自动生成的文件
+=========================================================
+下面的目录不太对
+========================================================
 目录：(+:代表文件，-:代表文件夹)
 --------package  这个的存在是为了将功能层与驱动层区分起来
 	+tft.c

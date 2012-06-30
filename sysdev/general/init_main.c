@@ -8,15 +8,15 @@
  *  compiler:GCC\n
  *  \date       2012-5-21 下午5:25:11
  */
-#include "../chip/ssd1963.h"
-#include "../cortex-m3_inc/systick.h"
-#include "../cortex-m3_inc/rcc.h"
-#include "../cortex-m3_inc/usart.h"
-#include "../cortex-m3_inc/gpio.h"
-#include "../package/usart_package.h"
-#include "../package/tft.h"
-#include "../cortex-m3_inc/led.h"
-#include "../cortex-m3_inc/touch.h"
+#include "../../chip/ssd1963.h"
+#include "../cortex-m3/cortex-m3_inc/systick.h"
+#include "../cortex-m3/cortex-m3_inc/rcc.h"
+#include "../cortex-m3/cortex-m3_inc/usart.h"
+#include "../cortex-m3/cortex-m3_inc/gpio.h"
+#include "../../package/usart_package.h"
+#include "../../package/tft.h"
+#include "../cortex-m3/cortex-m3_inc/led.h"
+#include "../cortex-m3/cortex-m3_inc/touch.h"
 /**
  * @brief  初始化串口1，LED灯的端口
  * @param	none

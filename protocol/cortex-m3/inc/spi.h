@@ -13,9 +13,9 @@
 #ifndef SPI_H_
 #define SPI_H_
 
-#include "../../user/user_configure/configure.h"
+#include "../../../user/user_configure/configure.h"
 #if CPU_TYPE == STM32F103VE
-#include "../../../stm32f103/STM32F10x/stm32f10x.h"
+#include "../../../cpu/stm32f103/STM32F10x/stm32f10x.h"
 #endif
 typedef struct{
 

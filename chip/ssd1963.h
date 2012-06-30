@@ -72,7 +72,7 @@
 #define   YELLOW       0xFFFF00                    // 黄色： 255, 255, 0
 #define   WHITE        0xFFFFFF                    // 白色： 255, 255, 255
 #endif
-#include "../stm32f103/STM32F10x/stm32f10x.h"
+#include "../cpu/stm32f103/STM32F10x/stm32f10x.h"
 
 #define SSD1963_NOP					0x00	/*!<  No operation*/
 #define SSD1963_SOFT_RESET			0x01	/*!<  Software reset*/
@@ -387,17 +387,17 @@
 
 extern void LCD_Clear(
 #ifdef PIXEL_16B_PACKAGE
-		INT32U Color
+        INT32U Color
 #endif
 #ifdef PIXEL_16B_565
-		INT16U Color
+        INT16U Color
 #endif
-		);
-extern void ssd1936_init(void);
-extern void set_rect(INT16U x0, INT16U y0, INT16U width, INT16U high);
-extern void draw_int_point(INT16U x0, INT16U y0);
-extern void display_word_mode(INT8U* index, INT16U, INT16U);
-extern void draw_word_point(INT16U x0, INT16U y0);
-extern void write_to_FramRam(INT16U* data, INT16U wide, INT16U high);
+        ) ;
+extern void ssd1936_init(void) ;
+extern void set_rect(INT16U x0 , INT16U y0 , INT16U width , INT16U high) ;
+extern void draw_int_point(INT16U x0 , INT16U y0) ;
+extern void display_word_mode(INT8U* index , INT16U , INT16U) ;
+extern void draw_word_point(INT16U x0 , INT16U y0) ;
+extern void write_to_FramRam(INT16U* data , INT16U wide , INT16U high) ;
 #endif /* SSD1963_H_ */
 
