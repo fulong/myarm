@@ -46,6 +46,8 @@
 │   ├── string.c
 │   └── string.h
 ├── Makefile 工程的管理文件
+├── OS
+│   └── ucos-ii
 ├── package 这个的存在是为了将功能层与驱动层区分起来
 │   ├── tft.c
 │   ├── tft.h
@@ -57,6 +59,7 @@
 │   │       └── spi.h
 │   └── spi.c
 ├── README
+├── setting.sh 配置用户宏
 ├── start_code 启动代码
 │   ├── mem.inc 设置堆栈，BSS等大小
 │   └── startup_stm32f10x_hd.s
@@ -86,7 +89,7 @@
 └── user  用户的应用层代码，包括一些用户配置
     ├── main.c
     └── user_configure
-        ├── configure.h 里面的宏很多宏开关
+        ├── configure.h 里面有很多宏开关
         └── include.h
 
-19 directories, 51 files
+21 directories, 52 files
