@@ -176,25 +176,38 @@ dir4depend()
 }
 ####################自动生成的依赖文件文件所在的路径####################################
 ####################项目的源码目录汇总###################################
-Source_Path()
+#目录中只包含了没有系统，跟CPU无关的代码目录
+NoARCH_AND_NoOS_Source_Path()
 {
-	sum_dir_temp=$(find . -type d | grep -v '^\./\.' | grep -v "OS")
-	OS_dir_temp=$(find . -type d | grep -v '^\./\.' | grep  "$1")
-	CSsources_temp=$(find . |grep -v '^\./\.' | grep '\.c$' | grep -v OS | sed 's/^\..*\///g')
-	OS_CSsources_temp=$(find . |grep -v '^\./\.' | grep '\.c$' | grep "$1" | sed 's/^\..*\///g')
+	sum_dir=$(find . -type d | grep -v '^\./\.' | grep -v "OS" | grep -v 'cortex-m3')
 
-	Csources="$Csources_temp $OS_Csources_temp"
+	Csources=$(find . |grep -v '^\./\.' | grep '\.c$' | grep -v OS | grep -v 'cortex-m3' | sed 's/^\..*\///g')
 	Ssources=$(find . |grep -v '^\./\.' | grep '\.s$' | sed 's/^\..*\///g')
+
 	Csources=$(echo -n $Csources)
 	echo "Csources=$Csources" >>configure.mk
 	Ssources=$(echo -n $Ssources)
 	echo "Ssources=$Ssources" >>configure.mk
-	sum_dir="$sum_dir_temp $OS_dir_temp"
 	sum_dir=$(echo -n $sum_dir) #将所有行连接在一起，并使他们在同一行
 	echo "VPATH=$sum_dir" >> configure.mk
 	echo "GPATH=$sum_dir" >> configure.mk
 }
 ####################项目的源码目录汇总###################################
+####################项目的自定义源码目录###################################
+Source_Path()
+{
+	sum_dir_temp=$(find . -type d | grep -v '^\./\.' | grep "$1")
+	Csources_temp=$(find . | grep -v '^\./\.' | grep '\.c$' | grep "$1" | sed 's/^\..*\///g')
+
+	Csources_temp=$(echo -n $Csources_temp)
+	echo "Csources+=$Csources_temp" >>configure.mk
+	sum_dir_temp=$(echo -n $sum_dir_temp) #将所有行连接在一起，并使他们在同一行
+	echo "VPATH+=$sum_dir_temp" >> configure.mk
+	echo "GPATH+=$sum_dir_temp" >> configure.mk
+	Csources="$Csources $Csources_temp"
+	sum_dir="$sum_dir $sum_dir_temp"
+}
+####################项目的自定义源码目录###################################
 ####################项目是否选用OS###################################
 OS_Select()
 {
@@ -226,8 +239,10 @@ CrossCompiler_Select
 ARCH_Select
 CPU_Select
 dir4obj
-dir4depend
+#dir4depend
+NoARCH_AND_NoOS_Source_Path
 OS_Select
+Source_Path $cpu_select
 clear
 echo "编译环境配置开始"
 #*******************工具配置********************************************
@@ -319,7 +334,7 @@ echo "LD的选项为$LD_FLAGS"
 echo "OBJCOPY的选项为$OBJCOPY_FLAGS"
 echo "OBJDUMP的选项为$OBJDUMP_FLAGS"
 echo "bin文件跟反汇编文件将在$obj_dir/目录中"
-echo "自动生成的依赖文件文件在$depend_dir/目录上"
+#echo "自动生成的依赖文件文件在$depend_dir/目录上"
 echo "项目的所有目录(VPATH和GPATH的值) ： $sum_dir"
 #*******************工具选项配置******************************************
 ####################编译环境配置###################################

@@ -13,7 +13,7 @@
 #ifndef SYSTICK_H_
 #define SYSTICK_H_
 
-#include "../../../cpu/stm32f103/STM32F10x/stm32f10x.h"
+#include "../../../cpu/cortex-m3/stm32f103/STM32F10x/stm32f10x.h"
 
 
 extern void systick_init(void);

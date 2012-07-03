@@ -15,7 +15,7 @@
 
 #include "../../../user/user_configure/configure.h"
 #if CPU_TYPE == STM32F103VE
-#include "../../../cpu/stm32f103/STM32F10x/stm32f10x.h"
+#include "../../../cpu/cortex-m3/stm32f103/STM32F10x/stm32f10x.h"
 #endif
 typedef struct{
 

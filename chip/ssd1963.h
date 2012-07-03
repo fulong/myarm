@@ -72,7 +72,7 @@
 #define   YELLOW       0xFFFF00                    // 黄色： 255, 255, 0
 #define   WHITE        0xFFFFFF                    // 白色： 255, 255, 255
 #endif
-#include "../cpu/stm32f103/STM32F10x/stm32f10x.h"
+#include "../cpu/cortex-m3/stm32f103/STM32F10x/stm32f10x.h"
 
 #define SSD1963_NOP					0x00	/*!<  No operation*/
 #define SSD1963_SOFT_RESET			0x01	/*!<  Software reset*/

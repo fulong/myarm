@@ -5,7 +5,7 @@
 ###############################################################
 sinclude configure.mk
 OBJ = $(Csources:.c=.o) $(Ssources:.s=.o)
-.PHONY: configure all clean distclean install
+.PHONY: configure all clean distclean install setting
 
 all:$(OBJ)
 	@echo "编译完成"
@@ -20,28 +20,39 @@ install:${OBJ}
 	@echo "bin与反汇编文件生成完毕"
 	@${RM} ${obj_dir}/temp.elf
 	@echo "elf中间文件删除完毕"
-%.d::%.c 
-	@$(CC) -MM $(CFLAGS) $< > ${depend_dir}/$@.temp
-	@cat ${depend_dir}/$@.temp | sed 's/$*\.o:/$*\.o $*\.d :/g' > ${depend_dir}/$@
-	@${RM} ${depend_dir}/$@.temp
-%.d::%.s
-	@$(CC) -MM $(CFLAGS) $< > ${depend_dir}/$@.temp
-	@cat ${depend_dir}/$@.temp | sed 's/$*\.o:/$*\.o $*\.d :/g' > ${depend_dir}/$@
-	@${RM} ${depend_dir}/$@.temp
-sinclude $(Csources:.c=.d) 
-sinclude $(Ssources:.s=.d)
-
-configure:./configure.sh
-	@./configure.sh
-clean :
-	-@${RM} ${obj_dir}/*.o *.o ${obj_dir}/$(proj_name).bin ${obj_dir}/$(proj_name).dis
-	@echo "清除所有O文件,bin与反汇编文件"
-distclean:
-	-@${RM} configure.mk  *.d $(CPU).lds *.o ${obj_dir}/$(proj_name).bin ${obj_dir}/$(proj_name).dis;
-	-@if [ "${depend_dir}" != "." ];then \
+#%.d:%.c 
+#	@echo "自动生成依赖"
+#	@$(CC) -MM $(CFLAGS) $< > ${depend_dir}/$@.temp
+#	@cat ${depend_dir}/$@.temp | sed 's/$*\.o:/$*\.o $*\.d :/g' > ${depend_dir}/$@
+#	@${RM} ${depend_dir}/$@.temp
+#%.d:%.s
+#	@echo "自动生成依赖"
+#	@$(CC) -MM $(CFLAGS) $< > ${depend_dir}/$@.temp
+#	@cat ${depend_dir}/$@.temp | sed 's/$*\.o:/$*\.o $*\.d :/g' > ${depend_dir}/$@
+#	@${RM} ${depend_dir}/$@.temp
+#如果使用了下面语句，makefile将自动重建依赖文件
+#sinclude $(Csources:.c=.d) 
+#sinclude $(Ssources:.s=.d)
+configure:
+	-@${RM} $(CPU).lds *.o ${obj_dir}/$(proj_name).bin ${obj_dir}/$(proj_name).dis;
+#	-@if [ "${depend_dir}" != "." ] && [ "${depend_dir}" != "" ];then \
 	${RM} ${depend_dir}/;\
 	fi
-	-@if [ "${obj_dir}" != "." ];then \
+	-@if [ "${obj_dir}" != "." ] && [ "${obj_dir}" != "" ];then \
+	${RM} ${obj_dir}/;\
+	fi
+	@./configure.sh
+setting:
+	@./setting.sh
+clean :
+	-@${RM} *.o ${obj_dir}/*.o ${obj_dir}/$(proj_name).bin ${obj_dir}/$(proj_name).dis;
+	@echo "清除所有O文件,bin与反汇编文件"
+distclean:
+	-@${RM} configure.mk   $(CPU).lds *.o ${obj_dir}/*.o ${obj_dir}/$(proj_name).bin ${obj_dir}/$(proj_name).dis;
+#	-@if [ "${depend_dir}" != "." ] && [ "${depend_dir}" != "" ];then \
+	${RM} ${depend_dir}/;\
+	fi
+	-@if [ "${obj_dir}" != "." ] && [ "${obj_dir}" != "" ];then \
 	${RM} ${obj_dir}/;\
 	fi
 	@echo "清除所有能自动生成的文件"
