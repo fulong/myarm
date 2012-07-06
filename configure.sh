@@ -182,7 +182,7 @@ NoARCH_AND_NoOS_Source_Path()
 	sum_dir=$(find . -type d | grep -v '^\./\.' | grep -v "OS" | grep -v 'cortex-m3')
 
 	Csources=$(find . |grep -v '^\./\.' | grep '\.c$' | grep -v OS | grep -v 'cortex-m3' | sed 's/^\..*\///g')
-	Ssources=$(find . |grep -v '^\./\.' | grep '\.s$' | sed 's/^\..*\///g')
+	Ssources=$(find . |grep -v '^\./\.' | grep '\.s$' | grep -v OS | grep -v 'cortex-m3' | sed 's/^\..*\///g')
 
 	Csources=$(echo -n $Csources)
 	echo "Csources=$Csources" >>configure.mk
@@ -190,22 +190,37 @@ NoARCH_AND_NoOS_Source_Path()
 	echo "Ssources=$Ssources" >>configure.mk
 	sum_dir=$(echo -n $sum_dir) #将所有行连接在一起，并使他们在同一行
 	echo "VPATH=$sum_dir" >> configure.mk
-	echo "GPATH=$sum_dir" >> configure.mk
+#	echo "GPATH=$sum_dir" >> configure.mk
 }
 ####################项目的源码目录汇总###################################
 ####################项目的自定义源码目录###################################
+#
+#brief:根据需要来增添相应的源码目录跟相应源码
+#
+#parm:目前有
+#		1.cortex-m3,增添cortex-m3源码目录跟cortex-m3源码
+#		2.OS,增添OS源码目录跟OS源码
+#note:只支持一个参数
 Source_Path()
 {
 	sum_dir_temp=$(find . -type d | grep -v '^\./\.' | grep "$1")
 	Csources_temp=$(find . | grep -v '^\./\.' | grep '\.c$' | grep "$1" | sed 's/^\..*\///g')
+	Ssources_temp=$(find . | grep -v '^\./\.' | grep '\.s$' | grep "$1" | sed 's/^\..*\///g')
 
 	Csources_temp=$(echo -n $Csources_temp)
+	Ssources_temp=$(echo -n $Ssources_temp)
+if [ "$1" != "NO_USE" ];then
+	echo "#############增加$1相关源文件与目录####################" >>configure.mk
 	echo "Csources+=$Csources_temp" >>configure.mk
+	echo "Ssources+=$Ssources_temp" >>configure.mk
+
 	sum_dir_temp=$(echo -n $sum_dir_temp) #将所有行连接在一起，并使他们在同一行
 	echo "VPATH+=$sum_dir_temp" >> configure.mk
-	echo "GPATH+=$sum_dir_temp" >> configure.mk
+#	echo "GPATH+=$sum_dir_temp" >> configure.mk
 	Csources="$Csources $Csources_temp"
 	sum_dir="$sum_dir $sum_dir_temp"
+	echo "#############增加$1相关源文件与目录####################" >>configure.mk
+fi
 }
 ####################项目的自定义源码目录###################################
 ####################项目是否选用OS###################################
@@ -223,13 +238,16 @@ OS_Select()
 		dialog --title "再次确认" --yesno "你将不使用OS，你确定要这样做吗？" 10 30
 		flag=$?
 		if [ "$flag" = "0" ];then
-			OS="os_no_use"
+			OS="NO_USE"
 		fi
 	elif [ "$OS" != "ucos-ii" ] && [ "$OS" != "RT-Thread" ] ;then
 		dialog --title "你可以选择的OS(目前支持),请输入正确的OS名称"  --msgbox "$OS_VAR" 20 50
 		flag=1
 	fi
 	done
+	if [ "$OS" = "NO_USE" ];then
+		echo "OS=OS_NO_USE" >> configure.mk
+	fi
 	Source_Path $OS
 }
 ####################项目是否选用OS###################################
@@ -239,19 +257,19 @@ CrossCompiler_Select
 ARCH_Select
 CPU_Select
 dir4obj
-#dir4depend
+dir4depend
 NoARCH_AND_NoOS_Source_Path
 OS_Select
 Source_Path $cpu_select
 clear
 echo "编译环境配置开始"
-#*******************工具配置********************************************
+echo "#*******************工具配置*************************************" >> configure.mk
 echo "CC=${cross_select}-gcc" >> configure.mk
 echo "LD=${cross_select}-ld" >> configure.mk
 echo "OBJCOPY=${cross_select}-objcopy" >> configure.mk
 echo "OBJDUMP=${cross_select}-objdump" >> configure.mk
 echo "AS=${cross_select}-gcc" >> configure.mk
-#*******************工具配置********************************************
+echo "#*******************工具配置*************************************" >> configure.mk
 #*******************工具选项配置******************************************
 echo "配置工具的选项"
 CFLAGS='-c -Wall -ffunction-sections '
@@ -264,13 +282,14 @@ echo 'ASFLAGS = -c -Wall -ffunction-sections' >> configure.mk
 echo 'LD_FLAGS = --gc-sections ' >> configure.mk
 echo 'OBJCOPY_FLAGS = -O binary -S' >> configure.mk
 echo 'OBJDUMP_FLAGS = -D -m arm' >> configure.mk
+#有些时候编译不通过，加上O选项的话
 if [ "$cross_select" = "arm-uclinuxeabi" ] || [ "$cpu_select" != "cortex-m3" ];then
 echo 'CFLAGS += -O2' >> configure.mk
 echo 'ASFLAGS += -O2' >> configure.mk
 CFLAGS="$CFLAGS -O2"
 ASFLAGS="$ASFLAGS -O2"
 fi
-
+#根据CPU型号加上相应的编译选项
 if [ "$arch_select" = "armv7-m" ];then
 case $cpu_select in
   "cortex-m3" )

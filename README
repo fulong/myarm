@@ -1,6 +1,8 @@
 使用环境：
 	OS：Fedora 17
 	IDE:Eclipse 4.2
+	CORSS_COMPILER 1.arm-none-eabi
+				   2.arm-uclinuxeabi
 	Eclipse plugin:Update Site
 		git		:  	http://download.eclipse.org/egit/update
 		arm		:  	http://gnuarmeclipse.sourceforge.net/updates
@@ -9,8 +11,9 @@
 		
 使用方法：
 	1.编译前，运行configure.sh脚本,make configure
-	2.make all
-	3.make install
+	2.make depend
+	3.make all
+	4.make install
 当想清理项目时：
 	1.make clean  是清掉O文件
 	2.make distclean 清掉会自动生成的文件
@@ -26,14 +29,15 @@
 │   └── tsc2046.h
 ├── configure.sh
 ├── cpu
-│   └── stm32f103 标准化的文件夹，可以不用修改
-│       ├── CoreSupport
-│       │   ├── core_cm3.c
-│       │   └── core_cm3.h
-│       └── STM32F10x
-│           ├── stm32f10x.h
-│           ├── system_stm32f10x.c
-│           └── system_stm32f10x.h
+│   └── cortex-m3
+│       └── stm32f103 标准化的文件夹，可以不用修改
+│           ├── CoreSupport
+│           │   ├── core_cm3.c
+│           │   └── core_cm3.h
+│           └── STM32F10x
+│               ├── stm32f10x.h
+│               ├── system_stm32f10x.c
+│               └── system_stm32f10x.h
 ├── Doxyfile  Doxgen的配置文件
 ├── lds_bak 保存着一些链接脚本，根据需要可能要修改
 │   └── cortex-m3.lds.bak.txt
@@ -92,4 +96,4 @@
         ├── configure.h 里面有很多宏开关
         └── include.h
 
-21 directories, 52 files
+22 directories, 52 files
