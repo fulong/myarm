@@ -1,0 +1,99 @@
+使用环境：
+	OS：Fedora 17
+	IDE:Eclipse 4.2
+	CORSS_COMPILER 1.arm-none-eabi
+				   2.arm-uclinuxeabi
+	Eclipse plugin:Update Site
+		git		:  	http://download.eclipse.org/egit/update
+		arm		:  	http://gnuarmeclipse.sourceforge.net/updates
+		vrapper	:	http://vrapper.sourceforge.net/update-site/stable (eclipse 的一个中 vim 插件)
+		zylin	:	http://opensource.zylin.com/zylincdt
+		
+使用方法：
+	1.编译前，运行configure.sh脚本,make configure
+	2.make depend
+	3.make all
+	4.make install
+当想清理项目时：
+	1.make clean  是清掉O文件
+	2.make distclean 清掉会自动生成的文件
+=========================================================
+下面的目录树：
+=========================================================
+.
+├── chip  写着基本的芯片驱动
+│   ├── font_image.h
+│   ├── ssd1963.c
+│   ├── ssd1963.h
+│   ├── tsc2046.c
+│   └── tsc2046.h
+├── configure.sh
+├── cpu
+│   └── cortex-m3
+│       └── stm32f103 标准化的文件夹，可以不用修改
+│           ├── CoreSupport
+│           │   ├── core_cm3.c
+│           │   └── core_cm3.h
+│           └── STM32F10x
+│               ├── stm32f10x.h
+│               ├── system_stm32f10x.c
+│               └── system_stm32f10x.h
+├── Doxyfile  Doxgen的配置文件
+├── lds_bak 保存着一些链接脚本，根据需要可能要修改
+│   └── cortex-m3.lds.bak.txt
+├── libc 一些与cpu无关的，但有经常用到的库文件
+│   ├── cpu_typed.h
+│   ├── font.c
+│   ├── font.h
+│   ├── libmath.c
+│   ├── libmath.h
+│   ├── string.c
+│   └── string.h
+├── Makefile 工程的管理文件
+├── OS
+│   └── ucos-ii
+├── package 这个的存在是为了将功能层与驱动层区分起来
+│   ├── tft.c
+│   ├── tft.h
+│   ├── usart_package.c
+│   └── usart_package.h
+├── protocol 一些基础的协议
+│   ├── cortex-m3
+│   │   └── inc
+│   │       └── spi.h
+│   └── spi.c
+├── README
+├── setting.sh 配置用户宏
+├── start_code 启动代码
+│   ├── mem.inc 设置堆栈，BSS等大小
+│   └── startup_stm32f10x_hd.s
+├── sysdev 写着关于cpu基本的内置功能驱动
+│   ├── cortex-m3
+│   │   ├── inc
+│   │   │   ├── fsmc.h
+│   │   │   ├── gpio.h
+│   │   │   ├── interrupt.h
+│   │   │   ├── led.h
+│   │   │   ├── rcc.h
+│   │   │   ├── sys.h
+│   │   │   ├── systick.h
+│   │   │   ├── touch.h
+│   │   │   └── usart.h
+│   │   └── src
+│   │       ├── fsmc.c
+│   │       ├── rcc.c
+│   │       └── systick.c
+│   └── general 通用设备函数
+│       ├── gpio.c
+│       ├── init_main.c
+│       ├── interrupt.c
+│       ├── led.c
+│       ├── touch.c
+│       └── usart.c
+└── user  用户的应用层代码，包括一些用户配置
+    ├── main.c
+    └── user_configure
+        ├── configure.h 里面有很多宏开关
+        └── include.h
+
+22 directories, 52 files
