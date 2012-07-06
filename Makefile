@@ -38,8 +38,10 @@ $(proj_name).bin:$(OBJ)
 	@echo "自动更新$*.c的依赖"
 	@echo "$*.d:\\"> $@
 	@$(CC) -MM  $< >> $@
-	@sed -i 's/\/.*\.o://g' $@
+	@echo "$*.temp__:\\">> $@
 	@$(CC) -MM  $< >> $@
+	@sed -i 's/^.*\.o://g' $@
+	@sed -i 's/\.temp__/\.o/g' $@
 	@sed -i '$$a\$$$$(CC) $$(CFLAGS) $$< -o $$@ ' $@
 	@sed -i '$$a\$$@echo "完成$*.o的生成" >> ${log_dir}/obj.log' $@
 	@sed -i '$$a\$$@date >> ${log_dir}/obj.log' $@
