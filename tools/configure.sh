@@ -181,14 +181,11 @@ NoARCH_AND_NoOS_Source_Path()
 
 	Csources=$(find . |grep -v '^\./\.' | grep '\.c$' | grep -v OS | grep -v 'cortex-m3') # | sed 's/^\..*\///g')
 	Ssources=$(find . |grep -v '^\./\.' | grep '\.s$' | grep -v OS | grep -v 'cortex-m3') # | sed 's/^\..*\///g')
-	Depend_OBJ=$(echo "${Csources} ${Ssources}" | sed 's/^\..*\///g' )
 
 	Csources=$(echo -n $Csources)
 	echo "Csources=$Csources" >>configure.mk
 	Ssources=$(echo -n $Ssources)
 	echo "Ssources=$Ssources" >>configure.mk
-	Depend_OBJ=$(echo -n $Depend_OBJ | sed 's/\.c/\.d/g' | sed 's/\.s/\.d/g')
-	echo "Depend_OBJ=$Depend_OBJ" >>configure.mk
 
 	sum_dir=$(echo -n $sum_dir) #将所有行连接在一起，并使他们在同一行
 	echo "VPATH=$sum_dir" >> configure.mk
@@ -208,16 +205,13 @@ Source_Path()
 	sum_dir_temp=$(find . -type d | grep -v '^\./\.' | grep "$1")
 	Csources=$(find . | grep -v '^\./\.' | grep '\.c$' | grep "$1" ) # | sed 's/^\..*\///g')
 	Ssources=$(find . | grep -v '^\./\.' | grep '\.s$' | grep "$1" ) # | sed 's/^\..*\///g')
-	Depend_OBJ=$(echo "${Csources} ${Ssources}" | sed 's/^\..*\///g')
 	Csources=$(echo -n $Csources)
 	Ssources=$(echo -n $Ssources)
-	Depend_OBJ=$(echo -n $Depend_OBJ | sed 's/\.c/\.d/g' | sed 's/\.s/\.d/g')
 		
 if [ "$1" != "NO_USE" ];then
 	echo "#############增加$1相关源文件与目录####################" >>configure.mk
 	echo "Csources+=$Csources" >>configure.mk
 	echo "Ssources+=$Ssources" >>configure.mk
-	echo "Depend_OBJ+=$Depend_OBJ" >>configure.mk
 
 	sum_dir_temp=$(echo -n $sum_dir_temp) #将所有行连接在一起，并使他们在同一行
 	echo "VPATH+=$sum_dir_temp" >> configure.mk
