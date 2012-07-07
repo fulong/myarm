@@ -46,7 +46,6 @@ $(proj_name).bin:$(OBJ)
 	@sed -i '$$a\$$@echo "完成$*.o的生成" >> ${log_dir}/obj.log' $@
 	@sed -i '$$a\$$@date >> ${log_dir}/obj.log' $@
 	@sed -i 's/^\$$/\t/g' $@
-	@./tools/depend.sh $@
 	@echo "$*.c的依赖生成完成" >> ${log_dir}/depend.log;
 	@date >> ${log_dir}/depend.log
 #如果使用了下面语句，makefile将自动重建依赖文件
