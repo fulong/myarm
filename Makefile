@@ -6,7 +6,8 @@
 sinclude configure.mk
 SHELL=/bin/bash
 OBJ = $(Csources:.c=.o) $(Ssources:.s=.o)
-Depend_OBJ = $(Csources:.c=.d) $(Ssources:.s=.d)
+
+Depend_OBJ=$(OBJ:.o=.d)
 .PHONY: configure all clean distclean install setting
 
 all:$(Depend_OBJ)
@@ -15,51 +16,62 @@ all:$(Depend_OBJ)
 install:$(proj_name).bin
 	@echo "安装完成"
 $(proj_name).bin:$(OBJ)
-	${LD} ${LD_FLAGS} -o ${obj_dir}/$(proj_name).elf $^
+	${LD} ${LD_FLAGS} -o ${exe_dir}/$(proj_name).elf $^
 	@echo "链接完成"
-	${OBJCOPY} ${OBJCOPY_FLAGS} ${obj_dir}/$(proj_name).elf ${obj_dir}/$(proj_name).bin
-	${OBJDUMP} ${OBJDUMP_FLAGS} ${obj_dir}/$(proj_name).elf > ${obj_dir}/$(proj_name).dis
+	${OBJCOPY} ${OBJCOPY_FLAGS} ${exe_dir}/$(proj_name).elf ${exe_dir}/$(proj_name).bin
+	${OBJDUMP} ${OBJDUMP_FLAGS} ${exe_dir}/$(proj_name).elf > ${exe_dir}/$(proj_name).dis
 	@echo "$(proj_name).bin与反汇编文件生成完毕"
-	@${RM} ${obj_dir}/$(proj_name).elf
+	@${RM} ${exe_dir}/$(proj_name).elf
 	@echo "elf中间文件删除完毕"
 
 %.d::%.s
 	@echo "自动更新$*.s的依赖"
-	@echo "$*.o:$*.s" > ${depend_dir}/$@
-	@sed -i 's/$*\.o:/$*\.d :/g' ${depend_dir}/$@
-	@echo "$*.o:$*.s" >> ${depend_dir}/$@
-	@sed -i '$$a$$(AS) $$(ASFLAGS) $$< -o $$(obj_dir)/$$@ '  ${depend_dir}/$@
-	@sed -i 's/^\$$/\t\$$/g' ${depend_dir}/$@
+	@echo "$*.o:$*.s" > $@
+	@sed -i 's/\.o:/\.d :/g' $@
+	@echo "$*.o:$*.s" >> $@
+	@sed -i '$$a\$$$$(AS) $$(ASFLAGS) $$< -o $$@ ' $@
+	@sed -i '$$a\$$@echo "完成$*.o的生成" >> ${log_dir}/obj.log' $@
+	@sed -i '$$a\$$@date >> ${log_dir}/obj.log' $@
+	@sed -i 's/^\$$/\t/g' $@
+	@echo "完成$*.s的依赖的生成" >> ${log_dir}/depend.log;
+	@date >> ${log_dir}/depend.log
 %.d::%.c
 	@echo "自动更新$*.c的依赖"
-	@$(CC) -MM  $< > ${depend_dir}/$@
-	@sed -i 's/$*\.o:/$*\.d :/g' ${depend_dir}/$@
-	@$(CC) -MM  $< >> ${depend_dir}/$@
-	@sed -i '$$a$$(CC) $$(CFLAGS) $$< -o $$(obj_dir)/$$@ ' ${depend_dir}/$@
-	@sed -i 's/^\$$/\t\$$/g' ${depend_dir}/$@
+	@echo "$*.d:\\"> $@
+	@$(CC) -MM  $< >> $@
+	@echo "$*.temp__:\\">> $@
+	@$(CC) -MM  $< >> $@
+	@sed -i 's/^.*\.o://g' $@
+	@sed -i 's/\.temp__/\.o/g' $@
+	@sed -i '$$a\$$$$(CC) $$(CFLAGS) $$< -o $$@ ' $@
+	@sed -i '$$a\$$@echo "完成$*.o的生成" >> ${log_dir}/obj.log' $@
+	@sed -i '$$a\$$@date >> ${log_dir}/obj.log' $@
+	@sed -i 's/^\$$/\t/g' $@
+	@echo "$*.c的依赖生成完成" >> ${log_dir}/depend.log;
+	@date >> ${log_dir}/depend.log
 #如果使用了下面语句，makefile将自动重建依赖文件
-sinclude $(wildcard ${depend_dir}/*.d)
+sinclude $(Depend_OBJ)
 configure:
-	-@${RM} $(CPU).lds *.o ${obj_dir}/$(proj_name).bin ${obj_dir}/$(proj_name).dis;
-	-@if [ "${depend_dir}" != "." ] && [ "${depend_dir}" != "" ];then \
-	${RM} ${depend_dir}/;\
+	-@${RM} $(CPU).lds *.o ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis;
+	-@if [ "${log_dir}" != "." ] && [ "${log_dir}" != "" ];then \
+	${RM} ${log_dir}/;\
 	fi
-	-@if [ "${obj_dir}" != "." ] && [ "${obj_dir}" != "" ];then \
-	${RM} ${obj_dir}/;\
+	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
+	${RM} ${exe_dir}/;\
 	fi
-	@./configure.sh
+	@./tools/configure.sh
 setting:
-	@./setting.sh
+	@./tools/setting.sh
 clean :
-	-@${RM} ${depend_dir}/*.d *.o ${obj_dir}/*.o ${obj_dir}/$(proj_name).bin ${obj_dir}/$(proj_name).dis;
-	@echo "清除所有o文件,bin与反汇编文件,各依赖"
+	-@${RM} $(Depend_OBJ) ${log_dir}/*.log ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis;
+	@echo "清除所有o文件,bin与反汇编文件,各依赖,日志文件"
 distclean:
 	@echo "清除所有能自动生成的文件"
-	-@${RM} configure.mk   $(CPU).lds *.o ${obj_dir}/*.o ${obj_dir}/$(proj_name).bin ${obj_dir}/$(proj_name).dis *.d;
-	-@if [ "${depend_dir}" != "." ] && [ "${depend_dir}" != "" ];then \
-	${RM} ${depend_dir}/;\
+	-@${RM} $(Depend_OBJ) configure.mk   $(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis ${log_dir}/*.log;
+	-@if [ "${log_dir}" != "." ] && [ "${log_dir}" != "" ];then \
+	${RM} ${log_dir}/;\
 	fi
-	-@if [ "${obj_dir}" != "." ] && [ "${obj_dir}" != "" ];then \
-	${RM} ${obj_dir}/;\
+	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
+	${RM} ${exe_dir}/;\
 	fi
 	

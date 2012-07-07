@@ -7,12 +7,10 @@ temp_file=/tmp/cross_configure #暂存文件
 cross_select= #编译器类型存储
 arch_select= #指令集选型
 cpu_select= #CPU内核选型
-obj_dir= #可执行文件，与反汇编文件所在
+exe_dir= #可执行文件，与反汇编文件所在
 LDS_BAK=lds_bak #链接脚本备份文件所在的文件夹
-depend_dir= #源文件所依赖的汇总文件所保存的文件夹
+log_dir= #源文件所依赖的汇总文件所保存的文件夹
 proj_name= #项目的名字
-Csources= #项目中C源文件总数
-SCsources= #项目中ASM源文件总数
 OS= #选择的RT系统
 ######################全局变量######################################
 dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
@@ -134,43 +132,43 @@ CPU_Select()
 ####################CPU内核版本选择####################################
 ####################生成的bin文件跟反汇编文件所在的路径####################################
 #这里所需要的O文件都是中间文件，所以到最后，这些都将在编译成功后删除掉。
-dir4obj()
+dir4exe()
 {
 	flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
 	while [ "$flag" != "0" ];do
-	dialog --title "设置O文件输出的路径" --inputbox "请输入O文件的链接路径，这路径也是链接脚本所在的位置。最终链接生成的bin文件跟反汇编文件将会移动到这个路径中。格式为:obj_dir" 20 50  2> $temp_file
-	obj_dir=$(cat $temp_file)
-	if [ -z "$obj_dir" ];then
+	dialog --title "设置O文件输出的路径" --inputbox "请输入O文件的链接路径，这路径也是链接脚本所在的位置。最终链接生成的bin文件跟反汇编文件将会移动到这个路径中。格式为:exe_dir" 20 50  2> $temp_file
+	exe_dir=$(cat $temp_file)
+	if [ -z "$exe_dir" ];then
 	dialog --title "再次确认" --yesno "bin文件跟反汇编文件将在根目录上，你确定要这样做吗？" 10 30 
 	flag=$?
-	obj_dir=.
+	exe_dir=.
 	else
-	mkdir -p $obj_dir
+	mkdir -p $exe_dir
 	flag=0
 	fi
 	if [ "$flag" = "0" ];then
-	echo "obj_dir=$obj_dir" >> configure.mk
+	echo "exe_dir=$exe_dir" >> configure.mk
 	fi
 	done
 }
 ###################生成的bin文件跟反汇编文件所在的路径####################################
 ####################自动生成的依赖文件文件所在的路径####################################
-dir4depend()
+dir4log()
 {
 	flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
 	while [ "$flag" != "0" ];do
-	dialog --title "设置自动生成的依赖文件文件所在的路径" --inputbox "自动生成的依赖文件文件所在的路径,格式为:depend" 20 50  2> $temp_file
-	depend_dir=$(cat $temp_file)
-	if [ -z "$depend_dir" ];then
+	dialog --title "设置自动生成的日志文件文件所在的路径" --inputbox "自动生成的依赖文件文件所在的路径,格式为:log" 20 50  2> $temp_file
+	log_dir=$(cat $temp_file)
+	if [ -z "$log_dir" ];then
 	dialog --title "再次确认" --yesno "自动生成的依赖文件文件将在根目录上，你确定要这样做吗？" 10 30 
 	flag=$?
-	depend_dir=.
+	log_dir=.
 	else
-	mkdir -p $depend_dir
+	mkdir -p $log_dir
 	flag=0
 	fi
 	if [ "$flag" = "0" ];then
-	echo "depend_dir=$depend_dir" >> configure.mk
+	echo "log_dir=$log_dir" >> configure.mk
 	fi
 	done
 }
@@ -181,13 +179,17 @@ NoARCH_AND_NoOS_Source_Path()
 {
 	sum_dir=$(find . -type d | grep -v '^\./\.' | grep -v "OS" | grep -v 'cortex-m3')
 
-	Csources=$(find . |grep -v '^\./\.' | grep '\.c$' | grep -v OS | grep -v 'cortex-m3' | sed 's/^\..*\///g')
-	Ssources=$(find . |grep -v '^\./\.' | grep '\.s$' | grep -v OS | grep -v 'cortex-m3' | sed 's/^\..*\///g')
+	Csources=$(find . |grep -v '^\./\.' | grep '\.c$' | grep -v OS | grep -v 'cortex-m3') # | sed 's/^\..*\///g')
+	Ssources=$(find . |grep -v '^\./\.' | grep '\.s$' | grep -v OS | grep -v 'cortex-m3') # | sed 's/^\..*\///g')
+	Depend_OBJ=$(echo "${Csources} ${Ssources}" | sed 's/^\..*\///g' )
 
 	Csources=$(echo -n $Csources)
 	echo "Csources=$Csources" >>configure.mk
 	Ssources=$(echo -n $Ssources)
 	echo "Ssources=$Ssources" >>configure.mk
+	Depend_OBJ=$(echo -n $Depend_OBJ | sed 's/\.c/\.d/g' | sed 's/\.s/\.d/g')
+	echo "Depend_OBJ=$Depend_OBJ" >>configure.mk
+
 	sum_dir=$(echo -n $sum_dir) #将所有行连接在一起，并使他们在同一行
 	echo "VPATH=$sum_dir" >> configure.mk
 #	echo "GPATH=$sum_dir" >> configure.mk
@@ -204,20 +206,22 @@ NoARCH_AND_NoOS_Source_Path()
 Source_Path()
 {
 	sum_dir_temp=$(find . -type d | grep -v '^\./\.' | grep "$1")
-	Csources_temp=$(find . | grep -v '^\./\.' | grep '\.c$' | grep "$1" | sed 's/^\..*\///g')
-	Ssources_temp=$(find . | grep -v '^\./\.' | grep '\.s$' | grep "$1" | sed 's/^\..*\///g')
-
-	Csources_temp=$(echo -n $Csources_temp)
-	Ssources_temp=$(echo -n $Ssources_temp)
+	Csources=$(find . | grep -v '^\./\.' | grep '\.c$' | grep "$1" ) # | sed 's/^\..*\///g')
+	Ssources=$(find . | grep -v '^\./\.' | grep '\.s$' | grep "$1" ) # | sed 's/^\..*\///g')
+	Depend_OBJ=$(echo "${Csources} ${Ssources}" | sed 's/^\..*\///g')
+	Csources=$(echo -n $Csources)
+	Ssources=$(echo -n $Ssources)
+	Depend_OBJ=$(echo -n $Depend_OBJ | sed 's/\.c/\.d/g' | sed 's/\.s/\.d/g')
+		
 if [ "$1" != "NO_USE" ];then
 	echo "#############增加$1相关源文件与目录####################" >>configure.mk
-	echo "Csources+=$Csources_temp" >>configure.mk
-	echo "Ssources+=$Ssources_temp" >>configure.mk
+	echo "Csources+=$Csources" >>configure.mk
+	echo "Ssources+=$Ssources" >>configure.mk
+	echo "Depend_OBJ+=$Depend_OBJ" >>configure.mk
 
 	sum_dir_temp=$(echo -n $sum_dir_temp) #将所有行连接在一起，并使他们在同一行
 	echo "VPATH+=$sum_dir_temp" >> configure.mk
 #	echo "GPATH+=$sum_dir_temp" >> configure.mk
-	Csources="$Csources $Csources_temp"
 	sum_dir="$sum_dir $sum_dir_temp"
 	echo "#############增加$1相关源文件与目录####################" >>configure.mk
 fi
@@ -256,8 +260,8 @@ ProjectName
 CrossCompiler_Select
 ARCH_Select
 CPU_Select
-dir4obj
-dir4depend
+dir4exe
+dir4log
 NoARCH_AND_NoOS_Source_Path
 OS_Select
 Source_Path $cpu_select
@@ -295,20 +299,20 @@ case $cpu_select in
   "cortex-m3" )
       echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
       echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
-      echo 'LD_FLAGS += -T$(obj_dir)/$(CPU).lds' >> configure.mk
+      echo 'LD_FLAGS += -T$(exe_dir)/$(CPU).lds' >> configure.mk
       CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
-      LD_FLAGS="$LD_FLAGS -T$obj_dir/$cpu_select.lds"
-      cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $obj_dir/$cpu_select.lds
+      LD_FLAGS="$LD_FLAGS -T$exe_dir/$cpu_select.lds"
+      cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $exe_dir/$cpu_select.lds
       ;;
   "cortex-a8" )
       echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
       echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
-      echo 'LD_FLAGS += -T$(obj_dir)//$(CPU).lds' >> configure.mk
+      echo 'LD_FLAGS += -T$(exe_dir)//$(CPU).lds' >> configure.mk
       CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
-      LD_FLAGS="$LD_FLAGS -T$obj_dir/$cpu_select.lds"
-      cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $obj_dir/$cpu_select.lds
+      LD_FLAGS="$LD_FLAGS -T$exe_dir/$cpu_select.lds"
+      cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $exe_dir/$cpu_select.lds
       ;;
   *) 
     echo "cpu选型有误，与指令集版本不匹配，请重新配置一次。"
@@ -322,11 +326,11 @@ case $cpu_select in
   "arm920t" )
       echo 'CFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> configure.mk
       echo 'ASFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> configure.mk
-      echo 'LD_FLAGS = -T$(obj_dir)/$(CPU).lds' >> configure.mk
+      echo 'LD_FLAGS = -T$(exe_dir)/$(CPU).lds' >> configure.mk
       CFLAGS="$CFLAGS -march=$arch_select -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mcpu=$cpu_select"
-      LD_FLAGS="$LD_FLAGS -T$obj_dir/$cpu_select.lds"
-      cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $obj_dir/$cpu_select.lds
+      LD_FLAGS="$LD_FLAGS -T$exe_dir/$cpu_select.lds"
+      cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $exe_dir/$cpu_select.lds
       ;;
   *) 
     echo "cpu选型有误，与指令集版本不匹配，请重新配置一次。"
@@ -352,9 +356,9 @@ echo "AS的选项为$ASFLAGS"
 echo "LD的选项为$LD_FLAGS"
 echo "OBJCOPY的选项为$OBJCOPY_FLAGS"
 echo "OBJDUMP的选项为$OBJDUMP_FLAGS"
-echo "bin文件跟反汇编文件将在$obj_dir/目录中"
-#echo "自动生成的依赖文件文件在$depend_dir/目录上"
-echo "项目的所有目录(VPATH和GPATH的值) ： $sum_dir"
+echo "bin文件跟反汇编文件将在$exe_dir/目录中"
+echo "自动生成的依赖文件文件在$log_dir/目录上"
+echo "项目的所有目录(VPATH的值) ： $sum_dir"
 #*******************工具选项配置******************************************
 ####################编译环境配置###################################
 
