@@ -64,11 +64,11 @@ configure:
 setting:
 	@./tools/setting.sh
 clean :
-	-@${RM} $(Depend_OBJ) ${log_dir}/*.log ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis;
+	${RM} $(Depend_OBJ) ${log_dir}/*.log ${OBJ} ${exe_dir}/$(proj_name).*
 	@echo "清除所有o文件,bin与反汇编文件,各依赖,日志文件"
 distclean:
 	@echo "清除所有能自动生成的文件"
-	-@${RM} $(Depend_OBJ) configure.mk  ${exe_dir}/$(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis ${log_dir}/*.log;
+	${RM} $(Depend_OBJ) configure.mk  ${exe_dir}/$(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).* ${log_dir}/*.log;
 	-@if [ "${log_dir}" != "." ] && [ "${log_dir}" != "" ];then \
 	${RM} ${log_dir}/;\
 	fi
