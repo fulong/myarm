@@ -52,7 +52,14 @@ $(proj_name).bin:$(OBJ)
 #如果使用了下面语句，makefile将自动重建依赖文件
 sinclude $(Depend_OBJ)
 configure:
-	@make distclean
+	@echo "清除所有能自动生成的文件"
+	-@${RM} $(Depend_OBJ) configure.mk  ${exe_dir}/$(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis ${log_dir}/*.log;
+	-@if [ "${log_dir}" != "." ] && [ "${log_dir}" != "" ];then \
+	${RM} ${log_dir}/;\
+	fi
+	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
+	${RM} ${exe_dir}/;\
+	fi
 	@./tools/configure.sh
 setting:
 	@./tools/setting.sh

@@ -244,8 +244,9 @@ OS_Select()
 	fi
 	done
 	if [ "$OS" = "NO_USE" ];then
-		echo "OS=OS_NO_USE" >> configure.mk
+		OS=OS_NO_USE
 	fi
+	echo "OS=$OS">> configure.mk
 	Source_Path $OS
 }
 ####################项目是否选用OS###################################
