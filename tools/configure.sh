@@ -208,6 +208,7 @@ Source_Path()
 	Csources=$(echo -n $Csources)
 	Ssources=$(echo -n $Ssources)
 		
+	echo "OS=$OS">> configure.mk
 if [ "$1" != "NO_USE" ];then
 	echo "#############增加$1相关源文件与目录####################" >>configure.mk
 	echo "Csources+=$Csources" >>configure.mk
@@ -246,7 +247,6 @@ OS_Select()
 	if [ "$OS" = "NO_USE" ];then
 		OS=OS_NO_USE
 	fi
-	echo "OS=$OS">> configure.mk
 	Source_Path $OS
 }
 ####################项目是否选用OS###################################

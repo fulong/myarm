@@ -6,7 +6,6 @@ int main(void)
 	printfs("enter the main function\r\n");
 #endif
 	LCD_Display_Words("我是笨蛋", 10, 10);
-
 	while (1)
 		;
 

@@ -11,12 +11,14 @@
 		
 使用方法：
 	1.编译前，运行configure.sh脚本,make configure
-	2.make depend
 	3.make all
 	4.make install
 当想清理项目时：
 	1.make clean  是清掉O文件
 	2.make distclean 清掉会自动生成的文件
+	3.make dclean 清除D文件
+当项目的文件或名字改变时：
+	使用，make update 来更新文件目录，而不必重新make configure
 =========================================================
 下面的目录树：
 =========================================================
@@ -27,7 +29,6 @@
 │   ├── ssd1963.h
 │   ├── tsc2046.c
 │   └── tsc2046.h
-├── configure.sh
 ├── cpu
 │   └── cortex-m3
 │       └── stm32f103 标准化的文件夹，可以不用修改
@@ -63,10 +64,10 @@
 │   │       └── spi.h
 │   └── spi.c
 ├── README
-├── setting.sh 配置用户宏
-├── start_code 启动代码
-│   ├── mem.inc 设置堆栈，BSS等大小
-│   └── startup_stm32f10x_hd.s
+├── start_code
+│   ├── cortex-m3
+│   │   └── startup_stm32f10x_hd.s
+│   └── mem.inc
 ├── sysdev 写着关于cpu基本的内置功能驱动
 │   ├── cortex-m3
 │   │   ├── inc
@@ -90,7 +91,11 @@
 │       ├── led.c
 │       ├── touch.c
 │       └── usart.c
-└── user  用户的应用层代码，包括一些用户配置
+├── tools
+│   ├── configure.sh 配置configure.mk
+│   ├── setting.sh  配置用户宏
+│   └── update.sh	更新configure.mk文件，而不必因小小文件名改变而重新配置configure.mk
+└└── user  用户的应用层代码，包括一些用户配置
     ├── main.c
     └── user_configure
         ├── configure.h 里面有很多宏开关
