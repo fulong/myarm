@@ -18,9 +18,9 @@ ifeq "$(Configure_exit)" "configure.mk"
 all:
 	@echo "include_open" >> ${log_dir}/$(proj_name).log
 	@make $(OBJ)
-	@echo "编译完成" | tee -a ${log_dir}/$(proj_name).log
-	@date >> ${log_dir}/$(proj_name).log
 	@make install
+	@echo "工程编译安装完成" | tee -a ${log_dir}/$(proj_name).log
+	@date >> ${log_dir}/$(proj_name).log
 
 install:$(proj_name).bin
 	@echo "安装完成" | tee -a ${log_dir}/$(proj_name).log

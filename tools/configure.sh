@@ -86,6 +86,7 @@ ARCH_Select()
 	flag=0
 	if [ -z "$arch_select" ];then
 	dialog --title "再次确认" --yesno "你将会使用GCC默认的指令集，你确定要这样做吗？" 10 30
+	arch_select=armv4t
 	flag=$?
 	elif [ "$arch_select" != "armv7-m" ] && [ "$arch_select" != "armv4t" ] ;then
 	dialog --title "你可以选择的指令集(目前支持),请输入正确的指令集名称"  --msgbox "$ARCH_VAR" 20 50
@@ -114,6 +115,7 @@ CPU_Select()
 	flag=0
 	if [ -z "$cpu_select" ];then
 	dialog --title "再次确认" --yesno "你将会使用GCC默认的CPU内核版本，你确定要这样做吗？" 10 30
+	cpu_select=arm920t
 	flag=$?
 	elif [ "$cpu_select" != "arm920t" ] && [ "$cpu_select" != "cortex-a8" ] && [ "$cpu_select" != "cortex-m3" ] ;then
 	dialog --title "你可以选择的CPU内核版本(目前支持),请输入正确的CPU内核版本名称"  --msgbox "$CPU_VAR" 20 50
