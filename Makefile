@@ -9,17 +9,18 @@ SHELL=/bin/bash
 Configure_exit=$(shell ls | grep 'configure\.mk')
 OBJ = $(Csources:.c=.o) $(Ssources:.s=.o)
 ifeq "$(Configure_exit)" "configure.mk"
-make_all_open=$(shell cat ${log_dir}/$(proj_name).log | tail -n1)
+include_open=$(shell cat ${log_dir}/$(proj_name).log | tail -n1)
 endif
 
 Depend_OBJ=$(OBJ:.o=.d)
 .PHONY:update configure all clean distclean install setting dclean
 ifeq "$(Configure_exit)" "configure.mk"
 all:
-	@echo "完成编译完成" | tee -a ${log_dir}/$(proj_name).log
-	@date >> ${log_dir}/$(proj_name).log
-	@echo "make_all" >> ${log_dir}/$(proj_name).log
+	@echo "include_open" >> ${log_dir}/$(proj_name).log
 	@make $(OBJ)
+	@echo "编译完成" | tee -a ${log_dir}/$(proj_name).log
+	@date >> ${log_dir}/$(proj_name).log
+	@make install
 
 install:$(proj_name).bin
 	@echo "安装完成" | tee -a ${log_dir}/$(proj_name).log
@@ -99,6 +100,6 @@ distclean:
 #如果使用了下面语句，makefile将自动重建依赖文件
 endif
 
-ifeq "$(make_all_open)" "make_all"
+ifeq "$(include_open)" "include_open"
 sinclude $(Depend_OBJ)
 endif
