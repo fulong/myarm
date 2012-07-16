@@ -1,3 +1,10 @@
 #!/bin/bash
+
+source tools/lib.sh
 echo "更新目录变化"
-update_dir_row=$(cat configure.mk -n | grep VPATH | sed 's/^[ ]*//g' | cut -s -f 1)
+if ! [ -f "configure.mk" ] ;then
+	echo "configure.mk不存在，请创建。"
+	exit 1
+fi
+dir_update
+exit 0

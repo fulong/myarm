@@ -6,16 +6,20 @@
 sinclude configure.mk
 
 SHELL=/bin/bash
-
+Configure_exit=$(shell ls | grep 'configure\.mk')
 OBJ = $(Csources:.c=.o) $(Ssources:.s=.o)
+ifeq "$(Configure_exit)" "configure.mk"
+make_all_open=$(shell cat ${log_dir}/$(proj_name).log | tail -n1)
+endif
 
 Depend_OBJ=$(OBJ:.o=.d)
 .PHONY:update configure all clean distclean install setting dclean
-
-all:$(Depend_OBJ)
-	@make $(OBJ)
+ifeq "$(Configure_exit)" "configure.mk"
+all:
 	@echo "完成编译完成" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
+	@echo "make_all" >> ${log_dir}/$(proj_name).log
+	@make $(OBJ)
 
 install:$(proj_name).bin
 	@echo "安装完成" | tee -a ${log_dir}/$(proj_name).log
@@ -53,7 +57,7 @@ $(proj_name).bin:$(OBJ)
 	@sed -i '$$a\\t@date >> ${log_dir}/obj.log' $@
 	@echo "$*.c的依赖生成完成" >> ${log_dir}/depend.log;
 	@date >> ${log_dir}/depend.log
-#如果使用了下面语句，makefile将自动重建依赖文件
+endif
 configure:
 	-@${RM} $(Depend_OBJ) configure.mk  ${exe_dir}/$(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis ${log_dir}/*.log;
 	-@if [ "${log_dir}" != "." ] && [ "${log_dir}" != "" ];then \
@@ -63,11 +67,13 @@ configure:
 	${RM} ${exe_dir}/;\
 	fi
 	@./tools/configure.sh
-	@echo "配置configure.mk" | tee -a ${log_dir}/$(proj_name).log
-	@date >> ${log_dir}/$(proj_name).log
+	@log_dir=$$(cat configure.mk | grep "log_dir"| sed 's/.*=//g');\
+	proj_name=$$(cat configure.mk | grep "proj_name"| sed 's/.*=//g');\
+	touch $$log_dir/$$proj_name.log $$log_dir/obj.log $$log_dir/depend.log
+ifeq "$(Configure_exit)" "configure.mk"
 update:
 	@echo "更新目录,文件变化" | tee -a ${log_dir}/$(proj_name).log
-	@date >> ${log_dir}/$(proj_name).log
+	@date >> ${log_dir}/$(proj_name).log 
 	@./tools/update.sh
 	
 setting:
@@ -90,4 +96,9 @@ distclean:
 	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
 	${RM} ${exe_dir}/;\
 	fi
+#如果使用了下面语句，makefile将自动重建依赖文件
+endif
+
+ifeq "$(make_all_open)" "make_all"
 sinclude $(Depend_OBJ)
+endif

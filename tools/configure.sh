@@ -12,7 +12,13 @@ LDS_BAK=lds_bak #链接脚本备份文件所在的文件夹
 log_dir= #源文件所依赖的汇总文件所保存的文件夹
 proj_name= #项目的名字
 OS= #选择的RT系统
+
+OS_dir=OS
+ARCH_Sum=cortex-m3 #这个变量表示函数NoARCH_AND_NoOS_Source_Path中消除的文件夹
 ######################全局变量######################################
+
+source tools/lib.sh
+
 dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
 ######################定义项目名称######################################
 ProjectName()
@@ -152,7 +158,7 @@ dir4exe()
 	done
 }
 ###################生成的bin文件跟反汇编文件所在的路径####################################
-####################自动生成的依赖文件文件所在的路径####################################
+####################自动生成的日志文件文件所在的路径####################################
 dir4log()
 {
 	flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
@@ -172,56 +178,7 @@ dir4log()
 	fi
 	done
 }
-####################自动生成的依赖文件文件所在的路径####################################
-####################项目的源码目录汇总###################################
-#目录中只包含了没有系统，跟CPU无关的代码目录
-NoARCH_AND_NoOS_Source_Path()
-{
-	sum_dir=$(find . -type d | grep -v '^\./\.' | grep -v "OS" | grep -v 'cortex-m3')
-
-	Csources=$(find . |grep -v '^\./\.' | grep '\.c$' | grep -v OS | grep -v 'cortex-m3') # | sed 's/^\..*\///g')
-	Ssources=$(find . |grep -v '^\./\.' | grep '\.s$' | grep -v OS | grep -v 'cortex-m3') # | sed 's/^\..*\///g')
-
-	Csources=$(echo -n $Csources)
-	echo "Csources=$Csources" >>configure.mk
-	Ssources=$(echo -n $Ssources)
-	echo "Ssources=$Ssources" >>configure.mk
-
-	sum_dir=$(echo -n $sum_dir) #将所有行连接在一起，并使他们在同一行
-	echo "VPATH=$sum_dir" >> configure.mk
-#	echo "GPATH=$sum_dir" >> configure.mk
-}
-####################项目的源码目录汇总###################################
-####################项目的自定义源码目录###################################
-#
-#brief:根据需要来增添相应的源码目录跟相应源码
-#
-#parm:目前有
-#		1.cortex-m3,增添cortex-m3源码目录跟cortex-m3源码
-#		2.OS,增添OS源码目录跟OS源码
-#note:只支持一个参数
-Source_Path()
-{
-	sum_dir_temp=$(find . -type d | grep -v '^\./\.' | grep "$1")
-	Csources=$(find . | grep -v '^\./\.' | grep '\.c$' | grep "$1" ) # | sed 's/^\..*\///g')
-	Ssources=$(find . | grep -v '^\./\.' | grep '\.s$' | grep "$1" ) # | sed 's/^\..*\///g')
-	Csources=$(echo -n $Csources)
-	Ssources=$(echo -n $Ssources)
-		
-	echo "OS=$OS">> configure.mk
-if [ "$1" != "NO_USE" ];then
-	echo "#############增加$1相关源文件与目录####################" >>configure.mk
-	echo "Csources+=$Csources" >>configure.mk
-	echo "Ssources+=$Ssources" >>configure.mk
-
-	sum_dir_temp=$(echo -n $sum_dir_temp) #将所有行连接在一起，并使他们在同一行
-	echo "VPATH+=$sum_dir_temp" >> configure.mk
-#	echo "GPATH+=$sum_dir_temp" >> configure.mk
-	sum_dir="$sum_dir $sum_dir_temp"
-	echo "#############增加$1相关源文件与目录####################" >>configure.mk
-fi
-}
-####################项目的自定义源码目录###################################
+####################自动生成的日志文件文件所在的路径####################################
 ####################项目是否选用OS###################################
 OS_Select()
 {
@@ -247,7 +204,8 @@ OS_Select()
 	if [ "$OS" = "NO_USE" ];then
 		OS=OS_NO_USE
 	fi
-	Source_Path $OS
+	echo "OS=$OS">> configure.mk
+		Source_Path $OS
 }
 ####################项目是否选用OS###################################
 ####################编译环境配置###################################
@@ -352,7 +310,7 @@ echo "LD的选项为$LD_FLAGS"
 echo "OBJCOPY的选项为$OBJCOPY_FLAGS"
 echo "OBJDUMP的选项为$OBJDUMP_FLAGS"
 echo "bin文件跟反汇编文件将在$exe_dir/目录中"
-echo "自动生成的依赖文件文件在$log_dir/目录上"
+echo "自动生成的日志文件文件在$log_dir/目录上"
 echo "项目的所有目录(VPATH的值) ： $sum_dir"
 #*******************工具选项配置******************************************
 ####################编译环境配置###################################
