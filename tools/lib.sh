@@ -1,7 +1,10 @@
 #!/bin/bash
 #configure.sh
+
 ####################项目的源码目录汇总###################################
 #目录中只包含了没有系统，跟CPU无关的代码目录
+OS_dir=OS
+ARCH_Sum="cortex-m3 arm920t" #这个变量表示函数NoARCH_AND_NoOS_Source_Path中消除的文件夹
 NoARCH_AND_NoOS_Source_Path()
 {
 	sum_dir=$(find . -type d | grep -v '^\./\.')
@@ -15,6 +18,7 @@ NoARCH_AND_NoOS_Source_Path()
 		Csources=$(echo "$Csources" | grep -v "$TEMP")
 		Ssources=$(echo "$Ssources" | grep -v "$TEMP")
 	done
+	echo "#############增加NoARCH相关源文件与目录####################" >>configure.mk
 	Csources=$(echo -n $Csources)
 	echo "Csources=$Csources" >>configure.mk
 	Ssources=$(echo -n $Ssources)
@@ -22,9 +26,11 @@ NoARCH_AND_NoOS_Source_Path()
 
 	sum_dir=$(echo -n $sum_dir) #将所有行连接在一起，并使他们在同一行
 	echo "VPATH=$sum_dir" >> configure.mk
+	echo "#############增加NoARCH相关源文件与目录####################" >>configure.mk
 #	echo "GPATH=$sum_dir" >> configure.mk
 }
 ####################项目的源码目录汇总###################################
+
 ####################项目的自定义源码目录###################################
 #
 #brief:根据需要来增添相应的源码目录跟相应源码
@@ -35,7 +41,7 @@ NoARCH_AND_NoOS_Source_Path()
 #note:只支持一个参数
 Source_Path()
 {
-	sum_dir_temp=$(find . -type d | grep -v '^\./\.' | grep "$1")
+	local sum_dir_temp=$(find . -type d | grep -v '^\./\.' | grep "$1")
 	Csources=$(find . | grep -v '^\./\.' | grep '\.c$' | grep "$1" ) # | sed 's/^\..*\///g')
 	Ssources=$(find . | grep -v '^\./\.' | grep '\.s$' | grep "$1" ) # | sed 's/^\..*\///g')
 	Csources=$(echo -n $Csources)
@@ -55,10 +61,37 @@ fi
 }
 ####################项目的自定义源码目录###################################
 #configure.sh
+
 #update.sh
-dir_update()
+#@function_name: _update
+#更新configure的某行
+#$1:要更新的行
+#$2:更新的内容
+#$3:在上部函数中进去此函数的次数，如非0，则有加号
+#$4:取值为：VPATH，Ssources,Csources
+_update()
 {
-	update_dir_row=$(echo `cat configure.mk -n | grep "VPATH" | sed 's/^[ ]*//g' | cut -s -f 1`)
-	update_vpath_dir=
+	local row="$1"
+	local update_item="$3"
+	local content=$(echo "$2" | sed 's/\//\\\//g' | sed 's/\./\\\./g')
+	local type="$4"
+	if [ "$type" = "NoARCH" ];then
+		for TEMP in $ARCH_Sum $OS_dir
+		do
+			content=$(echo "$content" | grep -v "$TEMP")
+		done
+		content=$(echo -n $content)
+		echo "${row}d" > sed.sh
+		echo "`expr ${row} + 1`i${update_item}=${content}" >> sed.sh
+		sed -i -f sed.sh configure.mk
+		rm -f sed.sh
+	else
+		content=$(echo "$content" | grep "$type")
+		content=$(echo -n $content)
+		echo "${row}d" > sed.sh
+		echo "`expr ${row} + 1`i${update_item}+=${content}" >> sed.sh
+		sed -i -f sed.sh configure.mk
+		rm -f sed.sh	
+	fi
 }
 #update.sh
