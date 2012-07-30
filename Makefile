@@ -3,18 +3,28 @@
 #@brief 编译整个项目
 #@data 2012-6-22-21:21
 ###############################################################
-sinclude configure.mk
-
 SHELL=/bin/bash
-Configure_exit=$(shell ls | grep 'configure\.mk')
+setting_src_dir:=setting_src
+sinclude configure_type.mk
+
+ifeq "$(configure_on)" "YES"
+ifeq "$(configure_type)" "prj_configure"
+sinclude configure.mk
+endif
+ifeq "$(configure_type)" "tools_configure"
+sinclude setting.mk
+endif
+
+endif
+
 OBJ = $(Csources:.c=.o) $(Ssources:.s=.o)
-ifeq "$(Configure_exit)" "configure.mk"
+ifeq "$(configure_on)" "YES"
 include_open=$(shell cat ${log_dir}/$(proj_name).log | tail -n1)
 endif
 
 Depend_OBJ=$(OBJ:.o=.d)
-.PHONY:update configure all clean distclean install setting dclean
-ifeq "$(Configure_exit)" "configure.mk"
+.PHONY:allclean update configure all clean distclean install setting dclean
+ifeq "$(configure_on)" "YES"
 all:
 	@echo "include_open" >> ${log_dir}/$(proj_name).log
 	@make $(OBJ)
@@ -26,6 +36,7 @@ install:$(proj_name).bin
 	@echo "安装完成" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 $(proj_name).bin:$(OBJ)
+ifeq "$(HOST)" "arm"
 	${LD} ${LD_FLAGS} -o ${exe_dir}/$(proj_name).elf $^
 	@echo "链接完成" | tee -a ${log_dir}/$(proj_name).log
 	${OBJCOPY} ${OBJCOPY_FLAGS} ${exe_dir}/$(proj_name).elf ${exe_dir}/$(proj_name).bin
@@ -34,7 +45,9 @@ $(proj_name).bin:$(OBJ)
 	@${RM} ${exe_dir}/$(proj_name).elf
 	@echo "elf中间文件删除完毕" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
-
+else
+	gcc -o ${exe_dir}/$(proj_name).bin $^
+endif
 %.d::%.s
 	@echo "自动更新$*.s的依赖"
 	@echo "$*.o:$*.s" > $@
@@ -58,9 +71,9 @@ $(proj_name).bin:$(OBJ)
 	@sed -i '$$a\\t@date >> ${log_dir}/obj.log' $@
 	@echo "$*.c的依赖生成完成" >> ${log_dir}/depend.log;
 	@date >> ${log_dir}/depend.log
-endif
+endif #ifeq "$(configure_on)" "YES"
 configure:
-	-@${RM} $(Depend_OBJ) configure.mk  ${exe_dir}/$(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis ${log_dir}/*.log;
+	-@${RM} $(Depend_OBJ) *.mk  ${exe_dir}/$(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis ${log_dir}/*.log;
 	-@if [ "${log_dir}" != "." ] && [ "${log_dir}" != "" ];then \
 	${RM} ${log_dir}/;\
 	fi
@@ -68,19 +81,52 @@ configure:
 	${RM} ${exe_dir}/;\
 	fi
 	@./tools/configure.sh
+	@echo 'configure_on=YES' > configure_type.mk
+	@echo 'configure_type=prj_configure' >> configure_type.mk
+	@echo 'HOST=arm' >> configure_type.mk
 	@log_dir=$$(cat configure.mk | grep "log_dir"| sed 's/.*=//g');\
 	proj_name=$$(cat configure.mk | grep "proj_name"| sed 's/.*=//g');\
 	touch $$log_dir/$$proj_name.log $$log_dir/obj.log $$log_dir/depend.log
-ifeq "$(Configure_exit)" "configure.mk"
+ifeq "$(configure_on)" "YES"
 update:
 	@echo "更新目录,文件变化" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log 
 	@./tools/update.sh
 	
 setting:
-	@./tools/setting.sh
+	@./tools/setting.bin
+compiling4setting:
+	@echo 'configure_on=YES' > configure_type.mk
+	@echo 'configure_type=tools_configure' >> configure_type.mk
+	@echo 'HOST=pc-linux' >> configure_type.mk
+	@echo 'proj_name=setting' > setting.mk
+	@echo 'log_dir=setting_src/log' >> setting.mk
+	@echo 'exe_dir=tools' >> setting.mk
+	@echo 'CC=gcc' >> setting.mk
+#	@echo 'OBJCOPY=objcopy' >> setting.mk
+#	@echo 'OBJDUMP=objdump' >> setting.mk
+#	@echo 'AS=gcc' >> setting.mk
+	@echo 'CFLAGS = -c -O2 -Wall -ffunction-sections' >> setting.mk
+#	@echo 'ASFLAGS = -c -O2 -Wall -ffunction-sections' >> setting.mk
+#	@echo 'LD_FLAGS = --gc-sections ' >> setting.mk
+#	@echo 'OBJCOPY_FLAGS = -O binary -S' >> setting.mk
+#	@echo 'OBJDUMP_FLAGS = -D ' >> setting.mk
+	@sum_dir_temp=$$(find . -type d | grep -v '^\./\.' | grep "$(setting_src_dir)");\
+	sum_dir_temp=$$(echo -n $$sum_dir_temp);\
+	echo "VPATH=$$sum_dir_temp" >> setting.mk
+	@Csources=$$(find . | grep -v '^\./\.' | grep '\.c$$' | grep "$(setting_src_dir)");\
+	Csources=$$(echo -n $$Csources);\
+	echo "Csources=$$Csources" >> setting.mk
+	@Ssources=$$(find . | grep -v '^\./\.' | grep '\.s$$' | grep "$(setting_src_dir)" );\
+	Ssources=$$(echo -n $$Ssources);\
+	echo "Ssources=$$Ssources" >> setting.mk
+
+allclean:clean dclean
 clean :
-	${RM}  ${log_dir}/obj.log ${OBJ} ${exe_dir}/$(proj_name).*
+	${RM}  ${log_dir}/obj.log ${OBJ} ${exe_dir}/$(proj_name).dis
+ifneq "$(configure_type)" "tools_configure"
+	${RM}  ${exe_dir}/$(proj_name).bin
+endif
 	@echo "清除所有o文件,bin与反汇编文件,日志文件" | tee -a -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 dclean :
@@ -90,15 +136,18 @@ dclean :
 distclean:
 	@echo "清除所有自动生成的文件" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
-	${RM} $(Depend_OBJ) configure.mk  ${exe_dir}/$(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).* ${log_dir}/*.log;
-	-@if [ "${log_dir}" != "." ] && [ "${log_dir}" != "" ];then \
-	${RM} ${log_dir}/;\
-	fi
+	@make allclean
+	@sed -i '2d' configure_type.mk
+	@sed -i '$$aconfigure_type=prj_configure' configure_type.mk
+	@sed -i 's/HOST=pc-linux/HOST=arm/g' configure_type.mk
+ifeq "$(configure_type)" "prj_configure"
+	${RM} *.mk
 	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
 	${RM} ${exe_dir}/;\
 	fi
-#如果使用了下面语句，makefile将自动重建依赖文件
 endif
+#如果使用了下面语句，makefile将自动重建依赖文件
+endif #ifeq "$(configure_on)" "YES"
 
 ifeq "$(include_open)" "include_open"
 sinclude $(Depend_OBJ)

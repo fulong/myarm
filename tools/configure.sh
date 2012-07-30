@@ -9,7 +9,7 @@ arch_select= #指令集选型
 cpu_select= #CPU内核选型
 exe_dir= #可执行文件，与反汇编文件所在
 LDS_BAK=lds_bak #链接脚本备份文件所在的文件夹
-log_dir= #源文件所依赖的汇总文件所保存的文件夹
+log_dir=log #日志文件所保存的文件夹
 proj_name= #项目的名字
 OS= #选择的RT系统
 
@@ -18,29 +18,6 @@ OS= #选择的RT系统
 source tools/lib.sh
 
 dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
-######################定义项目名称######################################
-ProjectName()
-{
-	local flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
-	while [ "$flag" != "0" ];do
-	dialog --clear
-	dialog --title "项目名称" --inputbox "请输入你当前使用项目名称。为空时，会默认为Myarm.\n" 20 50  2> $temp_file
-	
-	proj_name=$(cat $temp_file)
-	flag=0
-	if [ -z "$proj_name" ];then
-	dialog --title "再次确认" --yesno "你将会使用默认的项目名称，你确定要这样做吗？" 10 30
-	flag=$?
-	if [ "$flag" = "0" ];then
-	proj_name=Myarm
-	echo "proj_name=$proj_name" > configure.mk
-	fi
-	else 
-	echo "proj_name=$proj_name" > configure.mk
-	fi
-	done
-}
-######################定义项目名称######################################
 #################总共的源文件#####################################
 #################总共的源文件#####################################
 #################交叉编译器版本选择#####################################
@@ -159,25 +136,25 @@ dir4exe()
 }
 ###################生成的bin文件跟反汇编文件所在的路径####################################
 ####################自动生成的日志文件文件所在的路径####################################
-dir4log()
-{
-	local flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
-	while [ "$flag" != "0" ];do
-	dialog --title "设置自动生成的日志文件文件所在的路径" --inputbox "自动生成的依赖文件文件所在的路径,格式为:log" 20 50  2> $temp_file
-	log_dir=$(cat $temp_file)
-	if [ -z "$log_dir" ];then
-	dialog --title "再次确认" --yesno "自动生成的依赖文件文件将在根目录上，你确定要这样做吗？" 10 30 
-	flag=$?
-	log_dir=.
-	else
-	mkdir -p $log_dir
-	flag=0
-	fi
-	if [ "$flag" = "0" ];then
-	echo "log_dir=$log_dir" >> configure.mk
-	fi
-	done
-}
+#dir4log()
+#{
+	#	local flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
+	#while [ "$flag" != "0" ];do
+	#dialog --title "设置自动生成的日志文件文件所在的路径" --inputbox "自动生成的依赖文件文件所在的路径,格式为:log" 20 50  2> $temp_file
+	#log_dir=$(cat $temp_file)
+	#if [ -z "$log_dir" ];then
+	#dialog --title "再次确认" --yesno "自动生成的依赖文件文件将在根目录上，你确定要这样做吗？" 10 30 
+	#flag=$?
+	#log_dir=.
+	#else
+	#mkdir -p $log_dir
+	#flag=0
+	#fi
+	#if [ "$flag" = "0" ];then
+	#echo "log_dir=$log_dir" >> configure.mk
+	#fi
+	#done
+#}
 ####################自动生成的日志文件文件所在的路径####################################
 ####################项目是否选用OS###################################
 OS_Select()
@@ -214,18 +191,21 @@ CrossCompiler_Select
 ARCH_Select
 CPU_Select
 dir4exe
-dir4log
+#dir4log
+echo 'log_dir=log' >> configure.mk
+mkdir -p $log_dir
+
 NoARCH_AND_NoOS_Source_Path
 OS_Select
 Source_Path $cpu_select
 clear
 echo "编译环境配置开始"
 echo "#*******************工具配置*************************************" >> configure.mk
-echo "CC=${cross_select}-gcc" >> configure.mk
-echo "LD=${cross_select}-ld" >> configure.mk
-echo "OBJCOPY=${cross_select}-objcopy" >> configure.mk
-echo "OBJDUMP=${cross_select}-objdump" >> configure.mk
-echo "AS=${cross_select}-gcc" >> configure.mk
+echo 'CC=$(CROSS_COMPILER)gcc' >> configure.mk
+echo 'LD=$(CROSS_COMPILER)ld' >> configure.mk
+echo 'OBJCOPY=$(CROSS_COMPILER)objcopy' >> configure.mk
+echo 'OBJDUMP=$(CROSS_COMPILER)objdump' >> configure.mk
+echo 'AS=$(CROSS_COMPILER)gcc' >> configure.mk
 echo "#*******************工具配置*************************************" >> configure.mk
 #*******************工具选项配置******************************************
 echo "配置工具的选项"
@@ -241,8 +221,10 @@ echo 'OBJCOPY_FLAGS = -O binary -S' >> configure.mk
 echo 'OBJDUMP_FLAGS = -D -m arm' >> configure.mk
 #有些时候编译不通过，加上O选项的话
 if [ "$cross_select" = "arm-uclinuxeabi" ] || [ "$cpu_select" != "cortex-m3" ];then
+echo '#好像GCC不太支持CM3' >> configure.mk
 echo 'CFLAGS += -O2' >> configure.mk
 echo 'ASFLAGS += -O2' >> configure.mk
+echo '#好像GCC不太支持CM3' >> configure.mk
 CFLAGS="$CFLAGS -O2"
 ASFLAGS="$ASFLAGS -O2"
 fi
@@ -250,19 +232,23 @@ fi
 if [ "$arch_select" = "armv7-m" ];then
 case $cpu_select in
   "cortex-m3" )
+	echo "#添加$cpu_select相关标志" >> configure.mk
       echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
       echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
       echo 'LD_FLAGS += -T$(exe_dir)/$(CPU).lds' >> configure.mk
+	echo "#添加$cpu_select相关标志" >> configure.mk
       CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       LD_FLAGS="$LD_FLAGS -T$exe_dir/$cpu_select.lds"
       cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $exe_dir/$cpu_select.lds
       ;;
   "cortex-a8" )
+	echo "#添加$cpu_select相关标志" >> configure.mk
       echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
       echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
       echo 'LD_FLAGS += -T$(exe_dir)//$(CPU).lds' >> configure.mk
-      CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
+	echo "#添加$cpu_select相关标志" >> configure.mk
+         CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       LD_FLAGS="$LD_FLAGS -T$exe_dir/$cpu_select.lds"
       cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $exe_dir/$cpu_select.lds
@@ -277,9 +263,11 @@ fi
 if [ "$arch_select" = "armv4t" ];then
 case $cpu_select in
   "arm920t" )
+	echo "#添加$cpu_select相关标志" >> configure.mk
       echo 'CFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> configure.mk
       echo 'ASFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> configure.mk
       echo 'LD_FLAGS = -T$(exe_dir)/$(CPU).lds' >> configure.mk
+	echo "#添加$cpu_select相关标志" >> configure.mk
       CFLAGS="$CFLAGS -march=$arch_select -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mcpu=$cpu_select"
       LD_FLAGS="$LD_FLAGS -T$exe_dir/$cpu_select.lds"

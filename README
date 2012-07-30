@@ -10,13 +10,17 @@
 		zylin	:	http://opensource.zylin.com/zylincdt
 		
 使用方法：
+	tools/lib.sh中的两个变量：
+	OS_dir:如果OS的文件夹名字变化了，应该改变这个变量的值
+	ARCH_Sum:
 	1.编译前，运行configure.sh脚本,make configure
-	3.make all
-	4.make install
+	2.make all 编译与生成可执行文件的结合。
+	(当configure.mk不存在的时候,make会执行make configure的功能，如果存在则make all的功能)
 当想清理项目时：
 	1.make clean  是清掉O文件
 	2.make distclean 清掉会自动生成的文件
 	3.make dclean 清除D文件
+	4.make allclean clean跟dclean的功能结合
 当项目的文件或名字改变时：
 	使用，make update 来更新文件目录，而不必重新make configure
 =========================================================
@@ -93,12 +97,13 @@
 │       └── usart.c
 ├── tools
 │   ├── configure.sh 配置configure.mk
+│   ├── lib.sh
 │   ├── setting.sh  配置用户宏
 │   └── update.sh	更新configure.mk文件，而不必因小小文件名改变而重新配置configure.mk
-└└── user  用户的应用层代码，包括一些用户配置
+└── user  用户的应用层代码，包括一些用户配置
     ├── main.c
     └── user_configure
         ├── configure.h 里面有很多宏开关
         └── include.h
 
-22 directories, 52 files
+24 directories, 55 files
