@@ -4,7 +4,7 @@
 #@data 2012-6-22-21:21
 ###############################################################
 SHELL=/bin/bash
-setting_src_dir:=setting_src
+setting_src_dir:=tools_src/setting
 sinclude configure_type.mk
 
 ifeq "$(configure_on)" "YES"
@@ -23,7 +23,7 @@ include_open=$(shell cat ${log_dir}/$(proj_name).log | tail -n1)
 endif
 
 Depend_OBJ=$(OBJ:.o=.d)
-.PHONY:allclean update configure all clean distclean install setting dclean
+.PHONY:status allclean update configure all clean distclean install setting dclean
 ifeq "$(configure_on)" "YES"
 all:
 	@echo "include_open" >> ${log_dir}/$(proj_name).log
@@ -74,19 +74,19 @@ endif
 endif #ifeq "$(configure_on)" "YES"
 configure:
 	-@${RM} $(Depend_OBJ) *.mk  ${exe_dir}/$(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis ${log_dir}/*.log;
-	-@if [ "${log_dir}" != "." ] && [ "${log_dir}" != "" ];then \
-	${RM} ${log_dir}/;\
-	fi
 	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
 	${RM} ${exe_dir}/;\
 	fi
-	@./tools/configure.sh
 	@echo 'configure_on=YES' > configure_type.mk
 	@echo 'configure_type=prj_configure' >> configure_type.mk
 	@echo 'HOST=arm' >> configure_type.mk
+	@./tools/configure.sh
 	@log_dir=$$(cat configure.mk | grep "log_dir"| sed 's/.*=//g');\
 	proj_name=$$(cat configure.mk | grep "proj_name"| sed 's/.*=//g');\
-	touch $$log_dir/$$proj_name.log $$log_dir/obj.log $$log_dir/depend.log
+	touch $$log_dir/obj.log $$log_dir/depend.log;\
+	if ! [ -f "$$log_dir/$$proj_name.log" ];then \
+	touch $$log_dir/$$proj_name.log;\
+	fi
 ifeq "$(configure_on)" "YES"
 update:
 	@echo "更新目录,文件变化" | tee -a ${log_dir}/$(proj_name).log
@@ -100,7 +100,7 @@ compiling4setting:
 	@echo 'configure_type=tools_configure' >> configure_type.mk
 	@echo 'HOST=pc-linux' >> configure_type.mk
 	@echo 'proj_name=setting' > setting.mk
-	@echo 'log_dir=setting_src/log' >> setting.mk
+	@echo 'log_dir=$(setting_src_dir)/log' >> setting.mk
 	@echo 'exe_dir=tools' >> setting.mk
 	@echo 'CC=gcc' >> setting.mk
 #	@echo 'OBJCOPY=objcopy' >> setting.mk
@@ -114,6 +114,7 @@ compiling4setting:
 	@sum_dir_temp=$$(find . -type d | grep -v '^\./\.' | grep "$(setting_src_dir)");\
 	sum_dir_temp=$$(echo -n $$sum_dir_temp);\
 	echo "VPATH=$$sum_dir_temp" >> setting.mk
+	@echo "VPATH+=$(exe_dir)" >> setting.mk
 	@Csources=$$(find . | grep -v '^\./\.' | grep '\.c$$' | grep "$(setting_src_dir)");\
 	Csources=$$(echo -n $$Csources);\
 	echo "Csources=$$Csources" >> setting.mk
@@ -137,9 +138,6 @@ distclean:
 	@echo "清除所有自动生成的文件" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 	@make allclean
-	@sed -i '2d' configure_type.mk
-	@sed -i '$$aconfigure_type=prj_configure' configure_type.mk
-	@sed -i 's/HOST=pc-linux/HOST=arm/g' configure_type.mk
 ifeq "$(configure_type)" "prj_configure"
 	${RM} *.mk
 	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
@@ -147,7 +145,27 @@ ifeq "$(configure_type)" "prj_configure"
 	fi
 endif
 #如果使用了下面语句，makefile将自动重建依赖文件
+
+change2ARMprj:
+	@echo "变回ARM项目状态" | tee -a -a ${log_dir}/$(proj_name).log
+	@date >> ${log_dir}/$(proj_name).log
+	@sed -i '2d' configure_type.mk
+	@sed -i '$$aconfigure_type=prj_configure' configure_type.mk
+	@sed -i 's/HOST=pc-linux/HOST=arm/g' configure_type.mk
+	
 endif #ifeq "$(configure_on)" "YES"
+
+status:
+ifneq "$(configure_on)" "YES"
+	@echo "configure文件不存在"
+endif
+ifeq "$(configure_type)" "prj_configure"
+	@echo "Makefile目前在ARM项目状态中"
+	@echo "使用的处理器为$(ARCH)"
+endif
+ifeq "$(configure_type)" "tools_configure"
+	@echo "Makefile目前在编译工具项目状态中"
+endif
 
 ifeq "$(include_open)" "include_open"
 sinclude $(Depend_OBJ)

@@ -5,7 +5,7 @@
 #目录中只包含了没有系统，跟CPU无关的代码目录
 OS_dir=OS
 ARCH_Sum="cortex-m3 arm920t" #这个变量表示函数NoARCH_AND_NoOS_Source_Path中消除的文件夹
-extend_src="setting_src"
+extend_src="tools_src"
 NoARCH_AND_NoOS_Source_Path()
 {
 	sum_dir=$(find . -type d | grep -v '^\./\.')
