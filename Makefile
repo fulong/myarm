@@ -11,7 +11,7 @@ ifeq "$(configure_on)" "YES"
 ifeq "$(configure_type)" "prj_configure"
 sinclude configure.mk
 endif
-ifeq "$(configure_type)" "tools_configure"
+ifeq "$(configure_type)" "setting_tools_configure"
 sinclude setting.mk
 endif
 
@@ -88,16 +88,15 @@ configure:
 	touch $$log_dir/$$proj_name.log;\
 	fi
 ifeq "$(configure_on)" "YES"
-update:
+update4prj: #这个目标晚点会将其变成能服务于每一个项目
 	@echo "更新目录,文件变化" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log 
 	@./tools/update.sh
-	
 setting:
 	@./tools/setting.bin
 compiling4setting:
 	@echo 'configure_on=YES' > configure_type.mk
-	@echo 'configure_type=tools_configure' >> configure_type.mk
+	@echo 'configure_type=setting_tools_configure' >> configure_type.mk
 	@echo 'HOST=pc-linux' >> configure_type.mk
 	@echo 'proj_name=setting' > setting.mk
 	@echo 'log_dir=$(setting_src_dir)/log' >> setting.mk
@@ -125,7 +124,7 @@ compiling4setting:
 allclean:clean dclean
 clean :
 	${RM}  ${log_dir}/obj.log ${OBJ} ${exe_dir}/$(proj_name).dis
-ifneq "$(configure_type)" "tools_configure"
+ifneq "$(configure_type)" "setting_tools_configure"
 	${RM}  ${exe_dir}/$(proj_name).bin
 endif
 	@echo "清除所有o文件,bin与反汇编文件,日志文件" | tee -a -a ${log_dir}/$(proj_name).log
@@ -163,8 +162,8 @@ ifeq "$(configure_type)" "prj_configure"
 	@echo "Makefile目前在ARM项目状态中"
 	@echo "使用的处理器为$(ARCH)"
 endif
-ifeq "$(configure_type)" "tools_configure"
-	@echo "Makefile目前在编译linux工具项目状态中"
+ifeq "$(configure_type)" "setting_tools_configure"
+	@echo "Makefile目前在编译linux工具项目状态中(setting.bin)"
 endif
 
 ifeq "$(include_open)" "include_open"
