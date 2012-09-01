@@ -164,7 +164,7 @@ ifeq "$(configure_type)" "prj_configure"
 	@echo "使用的处理器为$(ARCH)"
 endif
 ifeq "$(configure_type)" "tools_configure"
-	@echo "Makefile目前在编译工具项目状态中"
+	@echo "Makefile目前在编译linux工具项目状态中"
 endif
 
 ifeq "$(include_open)" "include_open"
