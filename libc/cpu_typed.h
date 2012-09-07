@@ -37,5 +37,7 @@ typedef signed   int            INT32S;                   /*!< Signed   32 bit q
 #define LONG                    INT32S
 #define ULONG                   INT32U
 
-
+#define TRUE						  (1)
+#define FALSE						  (0)
+#define NULL						  ((void *)0)
 #endif /* CPU_TYPED_H_ */

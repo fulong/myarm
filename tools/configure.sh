@@ -3,6 +3,12 @@
 # @file : configure.sh
 # @brief: 项目代码最初使用的时候必须先运行这个脚本，配置好编译器，体系结构等等
 ######################全局变量######################################
+if ! [ -f "configure_type.mk" ];then
+echo "请正确使用configure.sh."
+echo "指令：make configure"
+exit 1
+fi
+######################全局变量######################################
 temp_file=/tmp/cross_configure #暂存文件
 cross_select= #编译器类型存储
 arch_select= #指令集选型
@@ -12,12 +18,26 @@ LDS_BAK=lds_bak #链接脚本备份文件所在的文件夹
 log_dir=log #日志文件所保存的文件夹
 proj_name= #项目的名字
 OS= #选择的RT系统
+use=$(cat configure_type.mk  | grep "configure_type"| sed 's/.*=//g')
 
+case $use in
+	"prj_configure" )
+		mk_name=configure.mk
+		;;
+	"setting_tools_configure" )
+		mk_name=setting.mk
+		;;
+		* )
+		echo "mk文件的名字有误"
+		exit 1
+		;;
+esac
 ######################全局变量######################################
+
+trap 'rm -rf configure_type.mk;exit 1' INT
 
 source tools/lib.sh
 
-trap 'rm -rf configure_type.mk;exit 1' INT
 dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
 #################总共的源文件#####################################
 #################总共的源文件#####################################
@@ -37,11 +57,11 @@ CrossCompiler_Select()
 	
 	cross_select=$(cat $temp_file)
 	if [ "$cross_select" = "1" ];then
-	echo "CROSS_COMPILER=arm-none-eabi-" >> configure.mk
-	cross_select=arm-none-eabi
+	echo "CROSS_COMPILER=arm-none-eabi-" >> $mk_name
+	cross_select=arm-none-eabi-
 	elif [ "$cross_select" = "2" ];then
-	echo "CROSS_COMPILER=arm-uclinuxeabi-" >> configure.mk
-	cross_select=arm-uclinuxeabi
+	echo "CROSS_COMPILER=arm-uclinuxeabi-" >> $mk_name
+	cross_select=arm-uclinuxeabi-
 	fi
 }
 #################交叉编译器版本选择#####################################
@@ -70,7 +90,7 @@ ARCH_Select()
 	fi
 	done
 	
-	echo "ARCH=$arch_select" >> configure.mk
+	echo "ARCH=$arch_select" >> $mk_name
 }
 ####################指令集版本选择####################################
 ####################CPU内核版本选择####################################
@@ -98,17 +118,17 @@ CPU_Select()
 	flag=1
 	if [ "$arch_select" = "" ] && [ "$flag" = "0" ];then
 	    dialog  --msgbox "cpu选型有误，与指令集版本不能不同时为空，请重新配置一次。" 20 50
-	    rm configure.mk
+	    rm $mk_name
 	    clear
 	    exit 0
 	fi
 	fi
 	done
 	
-	echo "CPU=$cpu_select" >> configure.mk
+	echo "CPU=$cpu_select" >> $mk_name
 	if [ "$arch_select" != "" ] && [ "$cpu_select" = "" ];then
 	    dialog  --msgbox "cpu选型有误，与指令集版本不能不同时为空，请重新配置一次。" 20 50
-	    rm configure.mk
+	    rm $mk_name
 	    clear
 	    exit 0
 	fi
@@ -131,7 +151,7 @@ dir4exe()
 	flag=0
 	fi
 	if [ "$flag" = "0" ];then
-	echo "exe_dir=$exe_dir" >> configure.mk
+	echo "exe_dir=$exe_dir" >> $mk_name
 	fi
 	done
 }
@@ -152,7 +172,7 @@ dir4exe()
 	#flag=0
 	#fi
 	#if [ "$flag" = "0" ];then
-	#echo "log_dir=$log_dir" >> configure.mk
+	#echo "log_dir=$log_dir" >> $mk_name
 	#fi
 	#done
 #}
@@ -182,32 +202,34 @@ OS_Select()
 	if [ "$OS" = "NO_USE" ];then
 		OS=OS_NO_USE
 	fi
-	echo "OS=$OS">> configure.mk
+	echo "OS=$OS">> $mk_name
 		Source_Path $OS
 }
 ####################项目是否选用OS###################################
 ####################编译环境配置###################################
-ProjectName
-CrossCompiler_Select
-ARCH_Select
-CPU_Select
-dir4exe
-#dir4log
-echo 'log_dir=log' >> configure.mk
-mkdir -p $log_dir
+case $use in
+	"prj_configure" )
+		ProjectName
+		CrossCompiler_Select
+		ARCH_Select
+		CPU_Select
+		dir4exe
+		#dir4log
+		echo 'log_dir=log' >> $mk_name
+		mkdir -p $log_dir
+		NoARCH_AND_NoOS_Source_Path
+		OS_Select
+		Source_Path $cpu_select
 
-NoARCH_AND_NoOS_Source_Path
-OS_Select
-Source_Path $cpu_select
 clear
 echo "编译环境配置开始"
-echo "#*******************工具配置*************************************" >> configure.mk
-echo 'CC=$(CROSS_COMPILER)gcc' >> configure.mk
-echo 'LD=$(CROSS_COMPILER)ld' >> configure.mk
-echo 'OBJCOPY=$(CROSS_COMPILER)objcopy' >> configure.mk
-echo 'OBJDUMP=$(CROSS_COMPILER)objdump' >> configure.mk
-echo 'AS=$(CROSS_COMPILER)gcc' >> configure.mk
-echo "#*******************工具配置*************************************" >> configure.mk
+echo "#*******************工具配置*************************************" >> $mk_name
+echo 'CC=$(CROSS_COMPILER)gcc' >> $mk_name
+echo 'LD=$(CROSS_COMPILER)ld' >> $mk_name
+echo 'OBJCOPY=$(CROSS_COMPILER)objcopy' >> $mk_name
+echo 'OBJDUMP=$(CROSS_COMPILER)objdump' >> $mk_name
+echo 'AS=$(CROSS_COMPILER)gcc' >> $mk_name
+echo "#*******************工具配置*************************************" >> $mk_name
 #*******************工具选项配置******************************************
 echo "配置工具的选项"
 CFLAGS='-c -Wall -ffunction-sections '
@@ -215,17 +237,17 @@ ASFLAGS='-c -Wall -ffunction-sections'
 OBJCOPY_FLAGS='-O binary -S'
 LD_FLAGS='--gc-sections '
 OBJDUMP_FLAGS='-D -m arm'
-echo 'CFLAGS = -c -Wall -ffunction-sections' >> configure.mk
-echo 'ASFLAGS = -c -Wall -ffunction-sections' >> configure.mk
-echo 'LD_FLAGS = --gc-sections ' >> configure.mk
-echo 'OBJCOPY_FLAGS = -O binary -S' >> configure.mk
-echo 'OBJDUMP_FLAGS = -D -m arm' >> configure.mk
+echo 'CFLAGS = -c -Wall -ffunction-sections' >> $mk_name
+echo 'ASFLAGS = -c -Wall -ffunction-sections' >> $mk_name
+echo 'LD_FLAGS = --gc-sections ' >> $mk_name
+echo 'OBJCOPY_FLAGS = -O binary -S' >> $mk_name
+echo 'OBJDUMP_FLAGS = -D -m arm' >> $mk_name
 #有些时候编译不通过，加上O选项的话
-if [ "$cross_select" = "arm-uclinuxeabi" ] || [ "$cpu_select" != "cortex-m3" ];then
-echo '#好像GCC不太支持CM3' >> configure.mk
-echo 'CFLAGS += -O2' >> configure.mk
-echo 'ASFLAGS += -O2' >> configure.mk
-echo '#好像GCC不太支持CM3' >> configure.mk
+if [ "$cross_select" = "arm-uclinuxeabi-" ] || [ "$cpu_select" != "cortex-m3" ];then
+echo '#好像GCC不太支持CM3' >> $mk_name
+echo 'CFLAGS += -O2' >> $mk_name
+echo 'ASFLAGS += -O2' >> $mk_name
+echo '#好像GCC不太支持CM3' >> $mk_name
 CFLAGS="$CFLAGS -O2"
 ASFLAGS="$ASFLAGS -O2"
 fi
@@ -233,22 +255,22 @@ fi
 if [ "$arch_select" = "armv7-m" ];then
 case $cpu_select in
   "cortex-m3" )
-	echo "#添加$cpu_select相关标志" >> configure.mk
-      echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
-      echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
-      echo 'LD_FLAGS += -T$(exe_dir)/$(CPU).lds' >> configure.mk
-	echo "#添加$cpu_select相关标志" >> configure.mk
+	echo "#添加$cpu_select相关标志" >> $mk_name
+      echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> $mk_name
+      echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> $mk_name
+      echo 'LD_FLAGS += -T$(exe_dir)/$(CPU).lds' >> $mk_name
+	echo "#添加$cpu_select相关标志" >> $mk_name
       CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       LD_FLAGS="$LD_FLAGS -T$exe_dir/$cpu_select.lds"
       cp -rf $LDS_BAK/$cpu_select.lds.bak.txt $exe_dir/$cpu_select.lds
       ;;
   "cortex-a8" )
-	echo "#添加$cpu_select相关标志" >> configure.mk
-      echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
-      echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> configure.mk
-      echo 'LD_FLAGS += -T$(exe_dir)//$(CPU).lds' >> configure.mk
-	echo "#添加$cpu_select相关标志" >> configure.mk
+	echo "#添加$cpu_select相关标志" >> $mk_name
+      echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> $mk_name
+      echo 'ASFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> $mk_name
+      echo 'LD_FLAGS += -T$(exe_dir)//$(CPU).lds' >> $mk_name
+	echo "#添加$cpu_select相关标志" >> $mk_name
          CFLAGS="$CFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mthumb -mcpu=$cpu_select"
       LD_FLAGS="$LD_FLAGS -T$exe_dir/$cpu_select.lds"
@@ -256,7 +278,7 @@ case $cpu_select in
       ;;
   *) 
     echo "cpu选型有误，与指令集版本不匹配，请重新配置一次。"
-    rm configure.mk
+    rm $mk_name
     exit 0
     ;;
 esac
@@ -264,11 +286,11 @@ fi
 if [ "$arch_select" = "armv4t" ];then
 case $cpu_select in
   "arm920t" )
-	echo "#添加$cpu_select相关标志" >> configure.mk
-      echo 'CFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> configure.mk
-      echo 'ASFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> configure.mk
-      echo 'LD_FLAGS = -T$(exe_dir)/$(CPU).lds' >> configure.mk
-	echo "#添加$cpu_select相关标志" >> configure.mk
+	echo "#添加$cpu_select相关标志" >> $mk_name
+      echo 'CFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> $mk_name
+      echo 'ASFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> $mk_name
+      echo 'LD_FLAGS = -T$(exe_dir)/$(CPU).lds' >> $mk_name
+	echo "#添加$cpu_select相关标志" >> $mk_name
       CFLAGS="$CFLAGS -march=$arch_select -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mcpu=$cpu_select"
       LD_FLAGS="$LD_FLAGS -T$exe_dir/$cpu_select.lds"
@@ -276,23 +298,32 @@ case $cpu_select in
       ;;
   *) 
     echo "cpu选型有误，与指令集版本不匹配，请重新配置一次。"
-    rm configure.mk
+    rm $mk_name
     exit 0
     ;;
 esac
 fi
+		;;
+	"setting_tools_configure" )
+		echo 'proj_name=setting' > $mk_name
+		;;
+		* )
+		echo "mk文件的名字有误"
+		exit 1
+		;;
+esac
 
-echo "RM=rm -rf">> configure.mk
+echo "RM=rm -rf">> $mk_name
 
 echo "配置完成。"
 echo "项目名称：$proj_name"
 echo "指令集:$arch_select"
 echo "CPU内核版本:$cpu_select"
-echo "CC工具为${cross_select}-gcc "
-echo "LD工具为${cross_select}-ld "
-echo "OBJCOPY工具为${cross_select}-objcopy "
-echo "OBJDUMP工具为${cross_select}-objdump "
-echo "AS工具为${cross_select}-gcc "
+echo "CC工具为${cross_select}gcc "
+echo "LD工具为${cross_select}ld "
+echo "OBJCOPY工具为${cross_select}objcopy "
+echo "OBJDUMP工具为${cross_select}objdump "
+echo "AS工具为${cross_select}gcc "
 echo "CC的选项为$CFLAGS"
 echo "AS的选项为$ASFLAGS"
 echo "LD的选项为$LD_FLAGS"
@@ -303,5 +334,4 @@ echo "自动生成的日志文件文件在$log_dir/目录上"
 echo "项目的所有目录(VPATH的值) ： $sum_dir"
 #*******************工具选项配置******************************************
 ####################编译环境配置###################################
-
 exit 0

@@ -98,7 +98,7 @@ compiling4setting:
 	@echo 'configure_on=YES' > configure_type.mk
 	@echo 'configure_type=setting_tools_configure' >> configure_type.mk
 	@echo 'HOST=pc-linux' >> configure_type.mk
-	@echo 'proj_name=setting' > setting.mk
+	@./tools/configure.sh
 	@echo 'log_dir=$(setting_src_dir)/log' >> setting.mk
 	@echo 'exe_dir=tools' >> setting.mk
 	@echo 'CC=gcc' >> setting.mk
