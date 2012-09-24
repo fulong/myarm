@@ -11,7 +11,7 @@ NoARCH_AND_NoOS_Source_Path()
 	sum_dir=$(find . -type d | grep -v '^\./\.')
 
 	Csources=$(find . |grep -v '^\./\.' | grep '\.c$') # | sed 's/^\..*\///g')
-	Ssources=$(find . |grep -v '^\./\.' | grep '\.s$') # | sed 's/^\..*\///g')
+	Ssources=$(find . |grep -v '^\./\.' | grep '\.S$') # | sed 's/^\..*\///g')
 
 	for TEMP in $ARCH_Sum $OS_dir $extend_src
 	do
@@ -44,7 +44,7 @@ Source_Path()
 {
 	local sum_dir_temp=$(find . -type d | grep -v '^\./\.' | grep "$1")
 	Csources=$(find . | grep -v '^\./\.' | grep '\.c$' | grep "$1" ) # | sed 's/^\..*\///g')
-	Ssources=$(find . | grep -v '^\./\.' | grep '\.s$' | grep "$1" ) # | sed 's/^\..*\///g')
+	Ssources=$(find . | grep -v '^\./\.' | grep '\.S$' | grep "$1" ) # | sed 's/^\..*\///g')
 	Csources=$(echo -n $Csources)
 	Ssources=$(echo -n $Ssources)
 		

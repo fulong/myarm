@@ -9,15 +9,17 @@
  *  \date       2012-5-23 上午9:25:12
  */
 #include "tsc2046.h"
+#ifdef TSC2046_DEVICE
+#if CPU_TYPE == STM32F103VE
 #include "../sysdev/cortex-m3/inc/gpio.h"
 #include "../sysdev/cortex-m3/inc/rcc.h"
 #include "../sysdev/cortex-m3/inc/sys.h"
-
 #define TP_CS					PCout(1)
 #define SPI_SCK					PBout(13)
 #define SPI_MISO				PBin(14)
 #define SPI_MISI				PBout(15)
 #define TP_IRQ					PCout(5)
+#endif
 
 /* ADS7843/7846/UH7843/7846/XPT2046/TSC2046 指令集 */
 #define CMD_RDY 0x90  //0B10010000即用差分方式读X坐标
@@ -135,3 +137,4 @@ INT32U Read_ADS(INT32U* x, INT32U* y)
 	return 1;//读数成功
 
 }
+#endif

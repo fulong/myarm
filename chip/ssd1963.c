@@ -1,6 +1,9 @@
 #include "ssd1963.h"
+#if CPU_TYPE == STM32F103VE
 #include "../sysdev/cortex-m3/inc/systick.h"
+#endif
 #include "../package/usart_package.h"
+#ifdef SSD1963_DEVICE
 /**
  *  \file	ssd1963.c
  *  \brief  ssd1963的基础操作函数
@@ -17,8 +20,10 @@ static void LCD_WriteRAM(INT16U RGB_Code) ;
 static INT8U ReadData(void) ;
 
 /* LCD is connected to the FSMC_Bank1_NOR/SRAM1 and NE4 is used as ship select signal */
+#if TFT_CONTROL_WAY == TFT_FSMC
 #define LCD_RAM    *(__IO INT16U *) ((INT32U)0x60020000)    //disp Data ADDR
 #define LCD_REG    *(__IO INT16U *) ((INT32U)0x60000000)	 //disp Reg ADDR
+#endif
 void write_to_FramRam(INT16U* data , INT16U wide , INT16U high)
 {
 	INT32U i = wide * high ;
@@ -511,4 +516,4 @@ INT8U ReadData(void)
 {
 	return LCD_RAM ;
 }
-
+#endif

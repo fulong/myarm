@@ -266,9 +266,11 @@ void Unicode_Index_MyFont(INT8U* font, INT32U* myfont_index)
 		*index_temp += 1;
 		UTF8_2_Unicode(font, &myutf8);
 		font += myutf8.UTF8_size;
+#if LIB_FONT != NO_LIB
 		*myfont_index++ = (WORD_FONT_SIZE
 				* (High_Byte_Index[myutf8.High_Byte_Index]
 						* Low_Byte_Index[myutf8.Low_Byte_Index]));
+#endif
 #ifdef __DEBUG__
 		printfs("myutf8.High_Byte_Index :");
 		printf_num(myutf8.High_Byte_Index, 'h');

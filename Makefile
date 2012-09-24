@@ -17,7 +17,7 @@ endif
 
 endif
 
-OBJ = $(Csources:.c=.o) $(Ssources:.s=.o)
+OBJ = $(Csources:.c=.o) $(Ssources:.S=.o)
 ifeq "$(configure_on)" "YES"
 include_open=$(shell cat ${log_dir}/$(proj_name).log | tail -n1)
 endif
@@ -42,17 +42,16 @@ ifeq "$(HOST)" "arm"
 	${OBJCOPY} ${OBJCOPY_FLAGS} ${exe_dir}/$(proj_name).elf ${exe_dir}/$(proj_name).bin
 	${OBJDUMP} ${OBJDUMP_FLAGS} ${exe_dir}/$(proj_name).elf > ${exe_dir}/$(proj_name).dis
 	@echo "$(proj_name).bin与反汇编文件生成完毕" | tee -a ${log_dir}/$(proj_name).log
-	@${RM} ${exe_dir}/$(proj_name).elf
 	@echo "elf中间文件删除完毕" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 else
 	gcc -o ${exe_dir}/$(proj_name).bin $^
 endif
-%.d::%.s
-	@echo "自动更新$*.s的依赖"
-	@echo "$*.o:$*.s" > $@
+%.d::%.S
+	@echo "自动更新$*.S的依赖"
+	@echo "$*.o:$*.S" > $@
 	@sed -i 's/\.o:/\.d :/g' $@
-	@echo "$*.o:$*.s" >> $@
+	@echo "$*.o:$*.S" >> $@
 	@sed -i '$$a\\t$$(AS) $$(ASFLAGS) $$< -o $$@ ' $@
 	@sed -i '$$a\\t@echo "完成$*.o的生成" >> ${log_dir}/obj.log' $@
 	@sed -i '$$a\\t@date >> ${log_dir}/obj.log' $@
@@ -117,7 +116,7 @@ compiling4setting:
 	@Csources=$$(find . | grep -v '^\./\.' | grep '\.c$$' | grep "$(setting_src_dir)");\
 	Csources=$$(echo -n $$Csources);\
 	echo "Csources=$$Csources" >> setting.mk
-	@Ssources=$$(find . | grep -v '^\./\.' | grep '\.s$$' | grep "$(setting_src_dir)" );\
+	@Ssources=$$(find . | grep -v '^\./\.' | grep '\.S$$' | grep "$(setting_src_dir)" );\
 	Ssources=$$(echo -n $$Ssources);\
 	echo "Ssources=$$Ssources" >> setting.mk
 
@@ -138,7 +137,7 @@ distclean:
 	@date >> ${log_dir}/$(proj_name).log
 	@make allclean
 ifeq "$(configure_type)" "prj_configure"
-	${RM} *.mk
+	${RM} *.mk *.lds
 	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
 	${RM} ${exe_dir}/;\
 	fi
@@ -146,7 +145,7 @@ endif
 #如果使用了下面语句，makefile将自动重建依赖文件
 
 change2ARMprj:
-	@echo "变回ARM项目状态" | tee -a -a ${log_dir}/$(proj_name).log
+	@echo "变回ARM项目状态" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 	@sed -i '2d' configure_type.mk
 	@sed -i '$$aconfigure_type=prj_configure' configure_type.mk

@@ -29,7 +29,7 @@ item_update()
 			content=$(find . |grep -v '^\./\.' | grep '\.c$') # | sed 's/^\..*\///g')
 		fi	
 		if [ "$times" = "1" ];then
-			content=$(find . |grep -v '^\./\.' | grep '\.s$') # | sed 's/^\..*\///g')
+			content=$(find . |grep -v '^\./\.' | grep '\.S$') # | sed 's/^\..*\///g')
 		fi		
 		#这个顺序跟CONFIGURE.SH生成configure.mk代码一样
 		#更新顺序 NoARCH OS ARCHDIR

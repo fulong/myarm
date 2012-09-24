@@ -13,7 +13,8 @@
 #define SSD1963_H_
 #include "../libc/cpu_typed.h"
 #include "../user/user_configure/configure.h"
-#ifdef TFT_7_0
+#ifdef SSD1963_DEVICE
+#if TFT_SIZE == TFT_7_0
 #define _HPS								(800)			/*!<  实际的屏幕的水平像素数量*/
 #define _VPS								(480)			/*!<  实际的屏幕的垂直像素数量*/
 #define DISP_HOR_PULSE_WIDTH		(1)
@@ -23,7 +24,7 @@
 #define DISP_VER_BACK_PORCH			(23)
 #define DISP_VER_FRONT_PORCH		(22)
 #endif
-#ifdef TFT_4_3
+#if TFT_SIZE == TFT_4_3
 #define _HPS								(480)			/*!<  实际的屏幕的水平像素数量*/
 #define _VPS								(272)			/*!<  实际的屏幕的垂直像素数量*/
 #define DISP_HOR_PULSE_WIDTH		1
@@ -72,8 +73,9 @@
 #define   YELLOW       0xFFFF00                    // 黄色： 255, 255, 0
 #define   WHITE        0xFFFFFF                    // 白色： 255, 255, 255
 #endif
+#if CPU_TYPE == STM32F103VE
 #include "../cpu/cortex-m3/stm32f103/STM32F10x/stm32f10x.h"
-
+#endif
 #define SSD1963_NOP					0x00	/*!<  No operation*/
 #define SSD1963_SOFT_RESET			0x01	/*!<  Software reset*/
 #define SSD1963_GET_POWER_MODE		0x0A	/*!<  Get the current power mode*/
@@ -384,7 +386,7 @@
 #define PIXEL_FORMAT_24B				5
 #define PIXEL_FORMAT_9B					6
 /*SSD1963_SET_PIXEL_DATA_INTERFACE各位定义*/
-
+#endif
 extern void LCD_Clear(
 #ifdef PIXEL_16B_PACKAGE
         INT32U Color

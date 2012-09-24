@@ -13,7 +13,7 @@
 #ifndef SPI_H_
 #define SPI_H_
 
-#include "../../../user/user_configure/configure.h"
+#include "../../generality.h"
 #if CPU_TYPE == STM32F103VE
 #include "../../../cpu/cortex-m3/stm32f103/STM32F10x/stm32f10x.h"
 #endif

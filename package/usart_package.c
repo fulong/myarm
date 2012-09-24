@@ -8,10 +8,11 @@
  *  compiler:GCC\n
  *  \date      Apr 23, 2012 6:06:29 PM
  */
-
-#include "../sysdev/cortex-m3/inc/usart.h"
-#include "../libc/libmath.h"
 #include "usart_package.h"
+#if CPU_TYPE == STM32F103VE
+#include "../sysdev/cortex-m3/inc/usart.h"
+#endif
+#include "../libc/libmath.h"
 #ifdef __DEBUG__
 /**
  * @brief  利用串口打印一字符串
@@ -21,12 +22,12 @@
 void
 printfs(const INT8S* str)
 {
-  while (*str)
-    {
-      while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
-        ;
-      USART_SendData(USART1, *str++);
-    }
+	while (*str)
+	{
+		while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
+		;
+		USART_SendData(USART1, *str++);
+	}
 }
 /**
  * @brief  打印数字，但不能打印10进制的，可以选择两种进制进行输出，16与2进制。
@@ -43,8 +44,8 @@ printfs(const INT8S* str)
 void
 printf_num(INT32U disnum, INT8U hex_or_bin)
 {
-  INT8S buf[32];
-  oct_transfer(disnum, buf, hex_or_bin);
-  printfs(buf);
+	INT8S buf[32];
+	oct_transfer(disnum, buf, hex_or_bin);
+	printfs(buf);
 }
 #endif

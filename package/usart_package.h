@@ -2,7 +2,7 @@
 #define __USART_PACKAGE_H__
 
 #include "../libc/cpu_typed.h"
-
+#include "../user/user_configure/configure.h"
 extern void printfs(const INT8S* data);
 extern void printf_num(INT32U,INT8U);
 
