@@ -1,4 +1,4 @@
-.include "start_code/cortex_m3_mem.inc"
+#include "cpu/cortex-m3/mem.inc"
 /**
   ******************************************************************************
   * @file      startup_stm32f10x_hd.s

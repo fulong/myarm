@@ -8,11 +8,16 @@
  *  compiler:GCC\n
  *  \date       2012-5-21 下午5:25:11
  */
+#include "../../user/user_configure/configure.h"
+#ifdef SSD1963_DEVICE
 #include "../../chip/ssd1963.h"
+#endif
+#if CPU_TYPE == STM32F103VE
 #include "../cortex-m3/inc/systick.h"
 #include "../cortex-m3/inc/rcc.h"
 #include "../cortex-m3/inc/usart.h"
 #include "../cortex-m3/inc/gpio.h"
+#endif
 #include "../../package/usart_package.h"
 #include "../../package/tft.h"
 #include "../cortex-m3/inc/led.h"
@@ -29,6 +34,7 @@
 
 void LED_GPIO_Configuration(void)
 {
+#if CPU_TYPE == STM32F103VE
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	RCC_APB2PeriphClockCmd(
@@ -57,6 +63,7 @@ void LED_GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+#endif
 }
 /**
  * @brief 配置串口
@@ -71,6 +78,7 @@ void LED_GPIO_Configuration(void)
  */
 void USART_Configuration(USART_TypeDef* USARTx)
 {
+#if CPU_TYPE == STM32F103VE
 	USART_InitTypeDef USART_InitStructure;
 	USART_InitStructure.USART_BaudRate = 115200; //波特率115200
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b; //8位数据
@@ -81,6 +89,7 @@ void USART_Configuration(USART_TypeDef* USARTx)
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_Init(USARTx, &USART_InitStructure);
 	USART_Cmd(USARTx, ENABLE);
+#endif
 }
 void _main(void)
 {

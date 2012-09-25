@@ -1,7 +1,7 @@
 //设置向量表
-#include "memory.h"
-#include "2440addr.h"
-#include "clock_option.h"
+#include "../../cpu/arm920t/memory.h"
+#include "../../cpu/arm920t/2440addr.h"
+#include "../../cpu/arm920t/clock_option.h"
 
 //Pre-defined constants
 
