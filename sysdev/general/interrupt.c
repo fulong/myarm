@@ -11,9 +11,12 @@
  *  compiler:GCC\n
  *  \date      Apr 24, 2012 2:39:58 PM
  */
+#include "../../user/user_configure/configure.h"
+#if CPU_TYPE == STM32F103VE
 #include "../cortex-m3/inc/interrupt.h"
-INT32U second = 0;
-extern INT8U USART_length;
+#endif
+//INT32U second = 0;
+//extern INT8U USART_length;
 
 /**
  * @brief 使能systick中断，但这个时候systick还未有开始工作
@@ -24,8 +27,10 @@ extern INT8U USART_length;
 // Function body
 void interrupt_open()
 {
+#if CPU_TYPE == STM32F103VE
 	USART_length = 0; //初始化串口中断发送的字符串长度
 	systick_enable_int(1);
+#endif
 }
 /**
  * @brief  设置NVIC分组
@@ -35,9 +40,10 @@ void interrupt_open()
  * @note
  */
 
-void NVIC_PriorityGroupConfig(u8 NVIC_Group)
+void NVIC_PriorityGroupConfig(INT8U NVIC_Group)
 {
-	u32 temp, temp1;
+#if CPU_TYPE == STM32F103VE
+	INT32U temp, temp1;
 	temp1 = (~NVIC_Group) & 0x07; //取后三位
 	temp1 <<= 8;
 	temp = SCB->AIRCR; //读取先前的设置
@@ -45,7 +51,9 @@ void NVIC_PriorityGroupConfig(u8 NVIC_Group)
 	temp |= 0X05FA0000; //写入钥匙
 	temp |= temp1;
 	SCB->AIRCR = temp; //设置分组
+#endif
 }
+
 /**
  * @brief 设置NVIC
  * @param NVIC_PreemptionPriority: 抢占优先级
@@ -64,10 +72,11 @@ void NVIC_PriorityGroupConfig(u8 NVIC_Group)
  NVIC_SubPriority和NVIC_PreemptionPriority的原则是,数值越小,越优先
  *
  */
-void nvic_group(u8 NVIC_PreemptionPriority, u8 NVIC_SubPriority,
-		IRQn_Type NVIC_Channel, u8 NVIC_Group)
+#if CPU_TYPE == STM32F103VE
+void nvic_group(INT8U NVIC_PreemptionPriority, INT8U NVIC_SubPriority,
+		IRQn_Type NVIC_Channel, INT8U NVIC_Group)
 {
-	u32 temp;
+	INT32U temp;
 	NVIC_PriorityGroupConfig(NVIC_Group); //设置分组
 	temp = NVIC_PreemptionPriority << (4 - NVIC_Group);
 	temp |= NVIC_SubPriority & (0x0f >> NVIC_Group);
@@ -80,6 +89,7 @@ void nvic_group(u8 NVIC_PreemptionPriority, u8 NVIC_SubPriority,
 	NVIC->IP[NVIC_Channel] |= temp << 4; //设置响应优先级和抢断优先级
 
 }
+#endif
 /**
  * @brief  NVIC初始化，设置中断组,中断初始化等等
  * @param  none
@@ -89,8 +99,10 @@ void nvic_group(u8 NVIC_PreemptionPriority, u8 NVIC_SubPriority,
  */
 void NVIC_Init(void)
 {
+#if CPU_TYPE == STM32F103VE
 //	interrupt_open();
 	nvic_group(3, 3, USART1_IRQn, 2); //组2，最低优先级
+#endif
 }
 /**
  * @brief  systick中断函数

@@ -17,11 +17,14 @@
 #include "../cortex-m3/inc/rcc.h"
 #include "../cortex-m3/inc/usart.h"
 #include "../cortex-m3/inc/gpio.h"
+#include "../cortex-m3/inc/led.h"
+#include "../cortex-m3/inc/touch.h"
+#endif
+#if CPU_TYPE == S3C2440
+#include "../arm920t/inc/uart.h"
 #endif
 #include "../../package/usart_package.h"
 #include "../../package/tft.h"
-#include "../cortex-m3/inc/led.h"
-#include "../cortex-m3/inc/touch.h"
 /**
  * @brief  初始化串口1，LED灯的端口
  * @param	none
@@ -94,7 +97,7 @@ void USART_Configuration(USART_TypeDef* USARTx)
 void _main(void)
 {
 	LED_GPIO_Configuration();
-	USART_Configuration(USART1);
+	USART_Configuration(USART0);
 #ifdef __DEBUG__
 	printfs("this is in init fuction.\r\n");
 	printfs("usart1's initation has compeleted.\r\n");
@@ -104,23 +107,17 @@ void _main(void)
 #ifdef __DEBUG__
 	printfs("open all the led.\r\n");
 #endif
+#if CPU_TYPE == STM32F103VE
 	systick_init();
+#endif
 #ifdef __DEBUG__
 	printfs("system ticket clock's initation has compeleted.\r\n");
 	printfs("\r\n");
 	printfs("now into the tft's initation.\r\n");
 #endif
+#if TFT_SIZE != NO_TFT
 	LCD_Init();
-
-	int i=0,j=i*i;
-
-	while(i < 400 && j < 240){
-		draw_word_point(i,j);
-		i++;
-		j = i*i;
-	}
-
-
+#endif
 //	set_orgin(480, 272);
 #ifdef __DEBUG__
 /*

@@ -40,4 +40,9 @@ typedef signed   int            INT32S;                   /*!< Signed   32 bit q
 #define TRUE						  (1)
 #define FALSE						  (0)
 #define NULL						  ((void *)0)
+
+#define     __I     volatile const          /*!< defines 'read only' permissions      */
+#define     __O     volatile                  /*!< defines 'write only' permissions     */
+#define     __IO    volatile                  /*!< defines 'read / write' permissions   */
+
 #endif /* CPU_TYPED_H_ */

@@ -72,10 +72,6 @@ endif
 	@date >> ${log_dir}/depend.log
 endif #ifeq "$(configure_on)" "YES"
 configure:
-	-@${RM} $(Depend_OBJ) *.mk  ${exe_dir}/$(CPU).lds ${OBJ} ${exe_dir}/$(proj_name).bin ${exe_dir}/$(proj_name).dis ${log_dir}/*.log;
-	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
-	${RM} ${exe_dir}/;\
-	fi
 	@echo 'configure_on=YES' > configure_type.mk
 	@echo 'configure_type=prj_configure' >> configure_type.mk
 	@echo 'HOST=arm' >> configure_type.mk
@@ -133,11 +129,11 @@ dclean :
 	@echo "清除依赖文件" | tee -a -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 distclean:
-	@echo "清除所有自动生成的文件" | tee -a ${log_dir}/$(proj_name).log
-	@date >> ${log_dir}/$(proj_name).log
+	@echo "清除所有自动生成的文件" | tee -a ${log_dir}/other.log
+	@date >> ${log_dir}/other.log
 	@make allclean
 ifeq "$(configure_type)" "prj_configure"
-	${RM} *.mk *.lds
+	${RM} ${log_dir}/${proj_name}.log  *.mk *.lds 
 	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
 	${RM} ${exe_dir}/;\
 	fi

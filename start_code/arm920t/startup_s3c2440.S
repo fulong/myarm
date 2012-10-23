@@ -111,7 +111,7 @@ start_code:
         //
 //===========================================================
 nand_boot_beg:
-	bl		RdNF2SDRAM
+//	bl		RdNF2SDRAM
 
   	mrs     r0,cpsr
 	bic     r0,r0,#MODEMASK
@@ -278,7 +278,7 @@ fiq:
 		stmfd sp!,{r0-r7,lr}
 		stmfd sp!,{r8-r13}^
 
-		bl fiq_handle
+//		bl fiq_handle
 		add sp,sp,#24
 		ldmia sp!,{r0-r7,pc}^
 /*		bl fiq*/

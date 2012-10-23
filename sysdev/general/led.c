@@ -22,8 +22,10 @@
 
 void LED_Init(void)
 {
+#if CPU_TYPE == STM32F103VE
 	LED1 = 1;
 	LED2 = 1;
 	LED3 = 1;
+#endif
 }
 

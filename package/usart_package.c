@@ -12,6 +12,9 @@
 #if CPU_TYPE == STM32F103VE
 #include "../sysdev/cortex-m3/inc/usart.h"
 #endif
+#if CPU_TYPE == S3C2440
+#include "../sysdev/arm920t/inc/uart.h"
+#endif
 #include "../libc/libmath.h"
 #ifdef __DEBUG__
 /**
