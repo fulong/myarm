@@ -13,7 +13,6 @@ if ! [ "$1" == "YES" ];then
 		echo 'configure_type_mk=YES' > configure_type.mk
 		echo "configure_type=$configure_type" >> configure_type.mk
 		echo 'HOST=arm' >> configure_type.mk
-		echo 'extern_src_dir:=tools_src/setting' >> configure_type.mk
 else
 case "$configure_type" in
 	"prj_configure")
@@ -32,4 +31,5 @@ case "$configure_type" in
 	;;
 esac
 fi
+sleep 1
 exit 0

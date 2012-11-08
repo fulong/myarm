@@ -15,23 +15,21 @@ arch_select= #指令集选型
 cpu_select= #CPU内核选型
 exe_dir= #可执行文件，与反汇编文件所在
 LDS_BAK=lds_bak #链接脚本备份文件所在的文件夹
-log_dir=log #日志文件所保存的文件夹
 proj_name= #项目的名字
 OS= #选择的RT系统
 use=$(cat  configure_type.mk  | grep "configure_type="| sed 's/.*=//g')
 
 case "$use" in
 	"prj_configure" )
-		mk_name=configure.mk
 		root_dir=.
-				dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
+		mk_name=configure.mk
+		log_dir=${root_dir}/log #日志文件所保存的文件夹
+		dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
 				;;
 	"setting_tools_configure" )
-		proj_name=setting
-		root_dir=tools_src/setting/
+		root_dir=tools_src/setting
 		mk_name=setting.mk
-		arch_select=x86
-		exe_dir=tools
+		log_dir=${root_dir}/log
 		;;
 		* )
 		echo "mk文件的名字有误"
@@ -144,18 +142,18 @@ dir4exe()
 {
 	local flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
 	while [ "$flag" != "0" ];do
-	dialog --title "设置O文件输出的路径" --inputbox "请输入O文件的链接路径，这路径也是链接脚本所在的位置。最终链接生成的bin文件跟反汇编文件将会移动到这个路径中。格式为:exe_dir" 20 50  2> $temp_file
+	dialog --title "设置${proj_name}的.o文件输出的路径" --inputbox "请输入${proj_name}的.o文件的链接路径，这路径也是链接脚本所在的位置。最终链接生成的bin文件跟反汇编文件将会移动到这个路径中。格式为:exe_dir" 20 50  2> $temp_file
 	exe_dir=$(cat $temp_file)
 	if [ -z "$exe_dir" ];then
 	dialog --title "再次确认" --yesno "bin文件跟反汇编文件将在根目录上，你确定要这样做吗？" 10 30 
 	flag=$?
-	exe_dir=.
+	exe_dir=$root_dir
 	else
-	mkdir -p $exe_dir
+	mkdir -p $root_dir/$exe_dir
 	flag=0
 	fi
 	if [ "$flag" = "0" ];then
-	echo "exe_dir=$exe_dir" >> $mk_name
+	echo "exe_dir=$root_dir/$exe_dir" >> $mk_name
 	fi
 	done
 }
@@ -219,12 +217,29 @@ case "$use" in
 		CPU_Select
 		dir4exe
 		#dir4log
-		echo 'log_dir=log' >> $mk_name
+		echo "log_dir=$log_dir" >> $mk_name
 		mkdir -p $log_dir
 		NoARCH_AND_NoOS_Source_Path
 		OS_Select
 		Source_Path $cpu_select
-
+		;;
+	"setting_tools_configure" )
+		proj_name=setting
+		CROSS_COMPILER=
+		arch_select=x86
+		exe_dir=tools
+		echo "proj_name=$proj_name" > $mk_name
+		echo "CROSS_COMPILER=$CROSS_COMPILER" >> $mk_name
+		echo "arch_select=$arch_select" >> $mk_name
+		dir4exe
+		echo "log_dir=${log_dir}" >> $mk_name
+		NoARCH_AND_NoOS_Source_Path
+		;;
+		* )
+		echo "mk文件的名字有误"
+		exit 1
+		;;
+esac
 clear
 echo "编译环境配置开始"
 echo "#*******************工具配置*************************************" >> $mk_name
@@ -238,14 +253,17 @@ echo "#*******************工具配置*************************************" >> 
 echo "配置工具的选项"
 CFLAGS='-c -Wall -ffunction-sections '
 ASFLAGS='-c -Wall -ffunction-sections'
-OBJCOPY_FLAGS='-O binary -S'
 LD_FLAGS='--gc-sections '
-OBJDUMP_FLAGS='-D -m arm'
 echo 'CFLAGS = -c -Wall -ffunction-sections' >> $mk_name
 echo 'ASFLAGS = -c -Wall -ffunction-sections' >> $mk_name
 echo 'LD_FLAGS = --gc-sections ' >> $mk_name
+
+if ! [ "$arch_select" = "x86" ];then
+OBJCOPY_FLAGS='-O binary -S'
+OBJDUMP_FLAGS='-D -m arm'
 echo 'OBJCOPY_FLAGS = -O binary -S' >> $mk_name
 echo 'OBJDUMP_FLAGS = -D -m arm' >> $mk_name
+fi
 #有些时候编译不通过，加上O选项的话
 if [ "$cross_select" = "arm-uclinuxeabi-" ] || [ "$cpu_select" != "cortex-m3" ];then
 echo '#好像GCC不太支持CM3' >> $mk_name
@@ -307,16 +325,13 @@ case "$cpu_select" in
     ;;
 esac
 fi
-		;;
-	"setting_tools_configure" )
-		echo "proj_name=$proj_name" > $mk_name
-		;;
-		* )
-		echo "mk文件的名字有误"
-		exit 1
-		;;
-esac
+
 echo 'configure_mk=YES' >> $mk_name
+touch $log_dir/obj.log $log_dir/depend.log
+if ! [ -f "$log_dir/${proj_name}.log" ];then 
+touch $log_dir/${proj_name}.log
+fi
+
 echo "RM=rm -rf">> $mk_name
 
 echo "配置完成。"

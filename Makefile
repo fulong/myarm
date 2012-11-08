@@ -15,13 +15,9 @@ ifeq "$(configure_type)" "setting_tools_configure"
 sinclude setting.mk
 endif
 
-ifeq "$(configure_type_mk)" "YES"
-ifeq "$(configure_mk)" "YES"
+ifeq "$(configure_type_mk)$(configure_mk)" "YESYES" #判断两个配置文件是否存在.
 configure_on=YES
 else
-configure_on=NO
-endif
-else 
 configure_on=NO
 endif
 
@@ -78,16 +74,8 @@ endif
 endif #ifeq "$(configure_on)" "YES"
 configure:
 	@./tools/configure_type.sh "$(configure_type_mk)" configure_type=prj_configure
-ifneq "$(configure_type_mk)" "YES"
-ifneq "$(configure_mk)" "YES"
+ifneq "$(configure_type_mk)$(configure_mk)" "YESYES"
 	@./tools/configure.sh
-	@log_dir=$$(cat configure.mk | grep "log_dir"| sed 's/.*=//g');\
-	proj_name=$$(cat configure.mk | grep "proj_name"| sed 's/.*=//g');\
-	touch $$log_dir/obj.log $$log_dir/depend.log;\
-	if ! [ -f "$$log_dir/$$proj_name.log" ];then \
-	touch $$log_dir/$$proj_name.log;\
-	fi
-endif
 endif
 install:
 	@./tools/install2arm.sh
@@ -101,36 +89,13 @@ update4prj: #这个目标晚点会将其变成能服务于每一个项目
 setting:
 	@./tools/setting.bin
 compiling4setting:
-	@./tools/configure.sh
 	@./tools/configure_type.sh "$(configure_type_mk)" configure_type=setting_tools_configure
-	@echo 'log_dir=$(extern_src_dir)/log' >> setting.mk
-	@echo 'exe_dir=tools' >> setting.mk
-	@echo 'CC=gcc' >> setting.mk
-#	@echo 'OBJCOPY=objcopy' >> setting.mk
-#	@echo 'OBJDUMP=objdump' >> setting.mk
-#	@echo 'AS=gcc' >> setting.mk
-	@echo 'CFLAGS = -c -O2 -Wall -ffunction-sections' >> setting.mk
-#	@echo 'ASFLAGS = -c -O2 -Wall -ffunction-sections' >> setting.mk
-#	@echo 'LD_FLAGS = --gc-sections ' >> setting.mk
-#	@echo 'OBJCOPY_FLAGS = -O binary -S' >> setting.mk
-#	@echo 'OBJDUMP_FLAGS = -D ' >> setting.mk
-	@sum_dir_temp=$$(find . -type d | grep -v '^\./\.' | grep "$(extern_src_dir)");\
-	sum_dir_temp=$$(echo -n $$sum_dir_temp);\
-	echo "VPATH=$$sum_dir_temp" >> setting.mk
-	@echo "VPATH+=$(exe_dir)" >> setting.mk
-	@Csources=$$(find . | grep -v '^\./\.' | grep '\.c$$' | grep "$(extern_src_dir)");\
-	Csources=$$(echo -n $$Csources);\
-	echo "Csources=$$Csources" >> setting.mk
-	@Ssources=$$(find . | grep -v '^\./\.' | grep '\.S$$' | grep "$(extern_src_dir)" );\
-	Ssources=$$(echo -n $$Ssources);\
-	echo "Ssources=$$Ssources" >> setting.mk
+	@./tools/configure.sh
 
 allclean:clean dclean
 clean :
 	${RM}  ${log_dir}/obj.log ${OBJ} ${exe_dir}/$(proj_name).dis
-ifneq "$(configure_type)" "setting_tools_configure"
 	${RM}  ${exe_dir}/$(proj_name).bin
-endif
 	@echo "清除所有o文件,bin与反汇编文件,日志文件" | tee -a -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 dclean :
@@ -141,13 +106,16 @@ distclean:
 	@echo "清除所有自动生成的文件" | tee -a ${log_dir}/other.log
 	@date >> ${log_dir}/other.log
 	@make allclean
-ifeq "$(configure_type)" "prj_configure"
-	${RM} ${log_dir}/${proj_name}.log  *.mk *.lds 
+	${RM} ${log_dir}/${proj_name}.log
 	-@if [ "${exe_dir}" != "." ] && [ "${exe_dir}" != "" ];then \
 	${RM} ${exe_dir}/;\
 	fi
+ifeq "$(configure_type)" "prj_configure"
+	${RM}  *.mk *.lds 
 endif
-	
+ifeq "$(configure_type)" "setting_tools_configure"
+	@./tools/configure_type.sh "$(configure_type_mk)" configure_type=prj_configure
+endif	
 endif #ifeq "$(configure_on)" "YES"
 
 status:

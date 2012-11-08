@@ -74,22 +74,13 @@ fi
 #$4:取值为：VPATH，Ssources,Csources
 _update()
 {
-#update.sh
-#@function_name: _update
-#更新configure的某行
-#$1:要更新的行
-#$2:更新的内容
-#$3:在上部函数中进去此函数的次数，如非0，则有加号
-#$4:取值为：VPATH，Ssources,Csources
-_update()
-{
 	local row="$1"
 	local update_item="$3"
 	local content=$(echo "$2" | sed 's/\//\\\//g' | sed 's/\./\\\./g')
 	local type="$4"
 	local operate=
 	if [ "$type" = "NoARCH" ];then
-		for TEMP in $ARCH_Sum $OS_dir
+		for TEMP in $ARCH_Sum $OS_dir $extend_src
 		do
 			content=$(echo "$content" | grep -v "$TEMP")
 		done
