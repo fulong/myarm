@@ -22,11 +22,8 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __STM32F10x_GPIO_H
 #define __STM32F10x_GPIO_H
-
-#ifdef __cplusplus
- extern "C" {
-#endif
-
+#include "../../user/user_configure/configure.h"
+#if CPU_TYPE == STM32F103VE
 /* Includes ------------------------------------------------------------------*/
 #include "../../../cpu/cortex-m3/stm32f103/STM32F10x/stm32f10x.h"
 
@@ -234,6 +231,7 @@ typedef enum
 /** @defgroup GPIO_Exported_Functions
   * @{
   */
+#endif
 void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct);
 
 #endif /* __STM32F10x_GPIO_H */

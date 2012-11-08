@@ -30,17 +30,17 @@
  */
 typedef struct
 {
-  INT8U UTF8_size;/*!< 该编码是多少个字节组成。取值为，1,2,3,4 */
-  INT8U UTF8_highest;/*!< 该编码的最高字节 */
-  INT8U UTF8_high;/*!<  该编码的次高字节*/
-  INT8U UTF8_low;/*!< 该编码的次低字节 */
-  INT8U UTF8_lowest;/*!< 该编码的最低字节 */
-  INT8U High_Byte_Index;/*!< 该编码在自定义字库高字节索引表的偏移量 unicode的高字节*/
-  INT8U Low_Byte_Index;/*!< 该编码在自定义字库低字节索引表的偏移量 unicode的低字节*/
+		INT8U UTF8_size;/*!< 该编码是多少个字节组成。取值为，1,2,3,4 */
+		INT8U UTF8_highest;/*!< 该编码的最高字节 */
+		INT8U UTF8_high;/*!<  该编码的次高字节*/
+		INT8U UTF8_low;/*!< 该编码的次低字节 */
+		INT8U UTF8_lowest;/*!< 该编码的最低字节 */
+		INT8U High_Byte_Index;/*!< 该编码在自定义字库高字节索引表的偏移量 unicode的高字节*/
+		INT8U Low_Byte_Index;/*!< 该编码在自定义字库低字节索引表的偏移量 unicode的低字节*/
 } MyUTF8;
 extern void
-UTF8_2_Unicode(INT8U* font, MyUTF8* myUTF8);
+UTF8_2_Unicode(INT8U* font , MyUTF8* myUTF8);
 extern void
-Unicode_Index_MyFont(INT8U* font, INT32U* myfont_index);
+Unicode_Index_MyFont(INT8U* font , INT32U* myfont_index);
 
 #endif /* FONT_H_ */

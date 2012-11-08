@@ -3,32 +3,33 @@
 
 ####################项目的源码目录汇总###################################
 #目录中只包含了没有系统，跟CPU无关的代码目录
-OS_dir=OS
-ARCH_Sum="cortex-m3 arm920t" #这个变量表示函数NoARCH_AND_NoOS_Source_Path中消除的文件夹
-extend_src="tools_src"
+OS_dir="/OS/"
+ARCH_Sum="/cortex-m3/ /arm920t/" #这个变量表示函数NoARCH_AND_NoOS_Source_Path中消除的文件夹
+extend_src="/tools_src/"
 NoARCH_AND_NoOS_Source_Path()
 {
-	sum_dir=$(find . -type d | grep -v '^\./\.')
+	sum_dir=$(find $root_dir -type d | grep -v '^\./\.')
 
-	Csources=$(find . |grep -v '^\./\.' | grep '\.c$') # | sed 's/^\..*\///g')
-	Ssources=$(find . |grep -v '^\./\.' | grep '\.S$') # | sed 's/^\..*\///g')
-
+	Csources=$(find $root_dir |grep -v '^\./\.' | grep '\.c$') # | sed 's/^\..*\///g')
+	Ssources=$(find $root_dir |grep -v '^\./\.' | grep '\.S$') # | sed 's/^\..*\///g')
+if [ "$root_dir" = "." ];then
 	for TEMP in $ARCH_Sum $OS_dir $extend_src
 	do
 		sum_dir=$(echo "$sum_dir" | grep -v "$TEMP")
 		Csources=$(echo "$Csources" | grep -v "$TEMP")
 		Ssources=$(echo "$Ssources" | grep -v "$TEMP")
-	done
-	echo "#############增加NoARCH相关源文件与目录####################" >>configure.mk
+	done		
+fi
+	echo "#############增加NoARCH相关源文件与目录####################" >>$mk_name
 	Csources=$(echo -n $Csources)
-	echo "Csources=$Csources" >>configure.mk
+	echo "Csources=$Csources" >>$mk_name
 	Ssources=$(echo -n $Ssources)
-	echo "Ssources=$Ssources" >>configure.mk
+	echo "Ssources=$Ssources" >>$mk_name
 
 	sum_dir=$(echo -n $sum_dir) #将所有行连接在一起，并使他们在同一行
-	echo "VPATH=$sum_dir" >> configure.mk
-	echo "#############增加NoARCH相关源文件与目录####################" >>configure.mk
-#	echo "GPATH=$sum_dir" >> configure.mk
+	echo "VPATH=$sum_dir" >> $mk_name
+	echo "#############增加NoARCH相关源文件与目录####################" >>$mk_name
+#	echo "GPATH=$sum_dir" >> $mk_name
 }
 ####################项目的源码目录汇总###################################
 
@@ -39,6 +40,7 @@ NoARCH_AND_NoOS_Source_Path()
 #parm:目前有
 #		1.cortex-m3,增添cortex-m3源码目录跟cortex-m3源码
 #		2.OS,增添OS源码目录跟OS源码
+#		3.自定义添加文件
 #note:只支持一个参数
 Source_Path()
 {
@@ -49,20 +51,29 @@ Source_Path()
 	Ssources=$(echo -n $Ssources)
 		
 if [ "$1" != "NO_USE" ];then
-	echo "#############增加$1相关源文件与目录####################" >>configure.mk
-	echo "Csources+=$Csources" >>configure.mk
-	echo "Ssources+=$Ssources" >>configure.mk
+	echo "#############增加$1相关源文件与目录####################" >>$mk_name
+	echo "Csources+=$Csources" >>$mk_name
+	echo "Ssources+=$Ssources" >>$mk_name
 
 	sum_dir_temp=$(echo -n $sum_dir_temp) #将所有行连接在一起，并使他们在同一行
-	echo "VPATH+=$sum_dir_temp" >> configure.mk
-#	echo "GPATH+=$sum_dir_temp" >> configure.mk
+	echo "VPATH+=$sum_dir_temp" >> $mk_name
+#	echo "GPATH+=$sum_dir_temp" >> $mk_name
 	sum_dir="$sum_dir $sum_dir_temp"
-	echo "#############增加$1相关源文件与目录####################" >>configure.mk
+	echo "#############增加$1相关源文件与目录####################" >>$mk_name
 fi
 }
 ####################项目的自定义源码目录###################################
 #configure.sh
 
+#update.sh
+#@function_name: _update
+#更新configure的某行
+#$1:要更新的行
+#$2:更新的内容
+#$3:在上部函数中进去此函数的次数，如非0，则有加号
+#$4:取值为：VPATH，Ssources,Csources
+_update()
+{
 #update.sh
 #@function_name: _update
 #更新configure的某行
@@ -109,10 +120,10 @@ ProjectName()
 	flag=$?
 	if [ "$flag" = "0" ];then
 	proj_name=Myarm
-	echo "proj_name=$proj_name" > configure.mk
+	echo "proj_name=$proj_name" > $mk_name
 	fi
 	else 
-	echo "proj_name=$proj_name" > configure.mk
+	echo "proj_name=$proj_name" > $mk_name
 	fi
 	done
 }

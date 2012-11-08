@@ -111,7 +111,7 @@ start_code:
         //
 //===========================================================
 nand_boot_beg:
-//	bl		RdNF2SDRAM
+	bl		RdNF2SDRAM
 
   	mrs     r0,cpsr
 	bic     r0,r0,#MODEMASK
@@ -216,13 +216,11 @@ software_interrupt:
 //        get_bad_stack
 //        bad_save_user_regs
 //        bl      do_software_interrupt
-//		stmfd sp!,{r0-r12,lr}
 //		sub r1,lr,#4
 //		ldr r0,[r1]
-//		eor r0,r0,#0xef000000
-//      bl      software_handle
-//		ldmia sp!,{r0-r12,pc}^
-		b software_interrupt
+
+        b      software_interrupt
+//		b OS_TASK_SW
         .align  5
 prefetch_abort:
 //        get_bad_stack
@@ -274,12 +272,9 @@ fiq:
 //        get_bad_stack
 //        bad_save_user_regs
 //        bl      do_fiq
-		sub lr,lr,#4
-		stmfd sp!,{r0-r7,lr}
-		stmfd sp!,{r8-r13}^
-
+//		sub lr,lr,#4
+//		stmfd sp!,{r0-r7,lr}
 //		bl fiq_handle
-		add sp,sp,#24
-		ldmia sp!,{r0-r7,pc}^
-/*		bl fiq*/
+//		ldmia sp!,{r0-r7,pc}^
+		bl fiq
 #endif

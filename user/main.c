@@ -2,9 +2,9 @@
 
 int main(void)
 {
-#ifdef __DEBUG__
+//#ifdef __DEBUG__
 	printfs("enter the main function\r\n");
-#endif
+//#endif
 	while (1)
 		;
 

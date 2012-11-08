@@ -10,6 +10,7 @@
  */
 
 #include "cortex-m3/inc/spi.h"
+
 void spi_io_configure(void)
 {
 //	GPIO_InitTypeDef GPIO_InitStructure;

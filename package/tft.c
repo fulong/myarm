@@ -6,10 +6,12 @@
 #endif
 #include "../chip/ssd1963.h"
 #include "../libc/font.h"
+/*
 #ifdef __DEBUG__
 #include "../sysdev/systick.h"
 #include "../package/usart_package.h"
 #endif
+*/
 #if LIB_FONT == POINT_LIB
 extern const INT8U chinese_font_mode[];
 #elif LIB_FONT == IMAGE_LIB

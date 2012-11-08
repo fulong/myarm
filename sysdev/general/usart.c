@@ -43,147 +43,163 @@
 
 #if CPU_TYPE == S3C2440
 #include "../arm920t/inc/uart.h"
-USART_TypeDef* USART0 =(USART_TypeDef*)UART0_BASE;
-USART_TypeDef* USART1 =(USART_TypeDef*)UART1_BASE;
-USART_TypeDef* USART2 =(USART_TypeDef*)UART2_BASE;
 
-USARTDATA_TypeDef* USART_DATA0 =(USARTDATA_TypeDef*)UART0DATA_BASE;
-USARTDATA_TypeDef* USART_DATA1 =(USARTDATA_TypeDef*)UART1DATA_BASE;
-USARTDATA_TypeDef* USART_DATA2 =(USARTDATA_TypeDef*)UART2DATA_BASE;
-
-USARTSTAT_TypeDef* USART_STAT0 =(USARTSTAT_TypeDef*)USAR0STAT_BASE;
-USARTSTAT_TypeDef* USART_STAT1 =(USARTSTAT_TypeDef*)UART1STAT_BASE;
-USARTSTAT_TypeDef* USART_STAT2 =(USARTSTAT_TypeDef*)UART2STAT_BASE;
-
+#ifdef TESTING__
+#define     PCLK                           50000000
+#define UART_CLK                                 PCLK
+#define UART_BRD(UART_BAUD_RATE) (UART_CLK / ((UART_BAUD_RATE) * 16)-1)
+void uart0_init(INT32U baudrate)
+{
+	UART0_PORT_SET()
+	USART0->ULCON = ULCON0_SET;
+	USART0->UCON = UCON_SET;
+	USART0->UFCON = UFCON_SET;
+	USART0->UMCON = 0; /*关闭流控*/
+	UBRDIV0 = UART_BRD(baudrate);
+}
+#endif
 #endif
 /**
-  * @����  ��� USART_InitStruct ��ָ���Ĳ����ʼ������ USARTx �Ĵ���.
-  * @����  USARTx: ѡ�� USART ��Χ�豸. 
-  *                ���������ȡ����ֵ֮һ: USART1, USART2, USART3, UART4 �� UART5.
-  * @����  USART_InitStruct: ָ��ṹ USART_InitTypeDef ��ָ�룬�������� USART ��������Ϣ.
-  * @����  û��
-  */
-INT32U USART_Init(USART_TypeDef* USARTx, USART_InitTypeDef* USART_InitStruct)
+ * @����  ��� USART_InitStruct ��ָ���Ĳ����ʼ������ USARTx �Ĵ���.
+ * @����  USARTx: ѡ�� USART ��Χ�豸.
+ *                ���������ȡ����ֵ֮һ: USART1, USART2, USART3, UART4 �� UART5.
+ * @����  USART_InitStruct: ָ��ṹ USART_InitTypeDef ��ָ�룬�������� USART ��������Ϣ.
+ * @����  û��
+ */
+INT32U USART_Init(USART_TypeDef* USARTx , USART_InitTypeDef* USART_InitStruct)
 {
 #if CPU_TYPE == STM32F103VE
-  INT32U tmpreg = 0x00, apbclock = 0x00;
-  INT32U integerdivider = 0x00;
-  INT32U fractionaldivider = 0x00;
-  INT32U usartxbase = 0;
-  RCC_ClocksTypeDef RCC_ClocksStatus;
-  /* The hardware flow control is available only for USART1, USART2 and USART3 */
-  usartxbase = (INT32U)USARTx;
+	INT32U tmpreg = 0x00, apbclock = 0x00;
+	INT32U integerdivider = 0x00;
+	INT32U fractionaldivider = 0x00;
+	INT32U usartxbase = 0;
+	RCC_ClocksTypeDef RCC_ClocksStatus;
+	/* The hardware flow control is available only for USART1, USART2 and USART3 */
+	usartxbase = (INT32U)USARTx;
 
-/*---------------------------- USART CR2 Configuration -----------------------*/
-  tmpreg = USARTx->CR2;
-  /* ��� STOP[13:12] λ */
-  tmpreg &= CR2_STOP_CLEAR_Mask;
-  /* ���� USART ����λ, ʱ��, ʱ�Ӽ���, ʱ����λ �� ĩλ ------------*/
-  /* ���� STOP[13:12] λ������ USART_StopBits ��ֵ */
-  tmpreg |= (INT32U)USART_InitStruct->USART_StopBits;
-  
-  /* д USART CR2 */
-  USARTx->CR2 = (INT16U)tmpreg;
+	/*---------------------------- USART CR2 Configuration -----------------------*/
+	tmpreg = USARTx->CR2;
+	/* ��� STOP[13:12] λ */
+	tmpreg &= CR2_STOP_CLEAR_Mask;
+	/* ���� USART ����λ, ʱ��, ʱ�Ӽ���, ʱ����λ �� ĩλ ------------*/
+	/* ���� STOP[13:12] λ������ USART_StopBits ��ֵ */
+	tmpreg |= (INT32U)USART_InitStruct->USART_StopBits;
 
-/*---------------------------- USART CR1 Configuration -----------------------*/
-  tmpreg = USARTx->CR1;
-  /* ��� M, PCE, PS, TE �� RE λ */
-  tmpreg &= CR1_CLEAR_Mask;
-  /* ���� USART �ֳ�, ��ż �� ģʽ ----------------------- */
-  /* ���� M   λ������ USART_WordLength ��ֵ */
-  /* ���� PCE �� PS λ������ USART_Parity ��ֵ */
-  /* ���� TE  �� RE λ������ USART_Mode ��ֵ */
-  tmpreg |= (INT32U)USART_InitStruct->USART_WordLength | USART_InitStruct->USART_Parity |
-            USART_InitStruct->USART_Mode;
-  /* д USART CR1 */
-  USARTx->CR1 = (INT16U)tmpreg;
+	/* д USART CR2 */
+	USARTx->CR2 = (INT16U)tmpreg;
 
-/*---------------------------- USART CR3 Configuration -----------------------*/  
-  tmpreg = USARTx->CR3;
-  /* ��� CTSE �� RTSE λ */
-  tmpreg &= CR3_CLEAR_Mask;
-  /* ���� USART HFC -------------------------------------------------*/
-  /* ���� CTSE �� RTSE λ������ USART_HardwareFlowControl ��ֵ */
-  tmpreg |= USART_InitStruct->USART_HardwareFlowControl;
-  /* д USART CR3 */
-  USARTx->CR3 = (INT16U)tmpreg;
+	/*---------------------------- USART CR1 Configuration -----------------------*/
+	tmpreg = USARTx->CR1;
+	/* ��� M, PCE, PS, TE �� RE λ */
+	tmpreg &= CR1_CLEAR_Mask;
+	/* ���� USART �ֳ�, ��ż �� ģʽ ----------------------- */
+	/* ���� M   λ������ USART_WordLength ��ֵ */
+	/* ���� PCE �� PS λ������ USART_Parity ��ֵ */
+	/* ���� TE  �� RE λ������ USART_Mode ��ֵ */
+	tmpreg |= (INT32U)USART_InitStruct->USART_WordLength | USART_InitStruct->USART_Parity |
+	USART_InitStruct->USART_Mode;
+	/* д USART CR1 */
+	USARTx->CR1 = (INT16U)tmpreg;
 
-/*---------------------------- USART BRR Configuration -----------------------*/
-  /* ���� USART ������ -------------------------------------------*/
-  RCC_GetClocksFreq(&RCC_ClocksStatus);
-  if (usartxbase == USART1_BASE)
-  {
-    apbclock = RCC_ClocksStatus.PCLK2_Frequency;
-  }
-  else
-  {
-    apbclock = RCC_ClocksStatus.PCLK1_Frequency;
-  }
-  /* ȷ������� */
-  integerdivider = ((0x19 * apbclock) / (0x04 * (USART_InitStruct->USART_BaudRate)));
-  tmpreg = (integerdivider / 0x64) << 0x04;
-  /* ȷ������� */
-  fractionaldivider = integerdivider - (0x64 * (tmpreg >> 0x04));
-  tmpreg |= ((((fractionaldivider * 0x10) + 0x32) / 0x64)) & ((uint8_t)0x0F);
-  /* д USART BRR */
-  USARTx->BRR = (INT16U)tmpreg;
+	/*---------------------------- USART CR3 Configuration -----------------------*/
+	tmpreg = USARTx->CR3;
+	/* ��� CTSE �� RTSE λ */
+	tmpreg &= CR3_CLEAR_Mask;
+	/* ���� USART HFC -------------------------------------------------*/
+	/* ���� CTSE �� RTSE λ������ USART_HardwareFlowControl ��ֵ */
+	tmpreg |= USART_InitStruct->USART_HardwareFlowControl;
+	/* д USART CR3 */
+	USARTx->CR3 = (INT16U)tmpreg;
+
+	/*---------------------------- USART BRR Configuration -----------------------*/
+	/* ���� USART ������ -------------------------------------------*/
+	RCC_GetClocksFreq(&RCC_ClocksStatus);
+	if (usartxbase == USART1_BASE)
+	{
+		apbclock = RCC_ClocksStatus.PCLK2_Frequency;
+	}
+	else
+	{
+		apbclock = RCC_ClocksStatus.PCLK1_Frequency;
+	}
+	/* ȷ������� */
+	integerdivider = ((0x19 * apbclock) / (0x04 * (USART_InitStruct->USART_BaudRate)));
+	tmpreg = (integerdivider / 0x64) << 0x04;
+	/* ȷ������� */
+	fractionaldivider = integerdivider - (0x64 * (tmpreg >> 0x04));
+	tmpreg |= ((((fractionaldivider * 0x10) + 0x32) / 0x64)) & ((uint8_t)0x0F);
+	/* д USART BRR */
+	USARTx->BRR = (INT16U)tmpreg;
 	return apbclock;
 #endif
+#if CPU_TYPE == S3C2440
+	UART0_PORT_SET()
+	USARTx->ULCON = USART_InitStruct->USART_Parity
+				+ USART_InitStruct->USART_Mode
+				+ USART_InitStruct->USART_StopBits
+				+ USART_InitStruct->USART_WordLength;
+	if( USARTX != USART2 )
+	{
+		USARTx->UMCON = USART_InitStruct->USART_HardwareFlowControl;
+	}
+#endif
 }
 /**
-  * @brief  Transmits single data through the USARTx peripheral.
-  * @param  USARTx: Select the USART or the UART peripheral.
-  *   This parameter can be one of the following values:
-  *   USART1, USART2, USART3, UART4 or UART5.
-  * @param  Data: the data to transmit.
-  * @retval None
-  */
-void USART_SendData(USART_TypeDef* USARTx, INT16U Data)
-{    
-#if CPU_TYPE == STM32F103VE
-	  /* Transmit Data */
-  while (!(USARTx->SR & USART_FLAG_TXE));
-  USARTx->DR = (Data & (INT16U)0x01FF);
-}
-/**
-  * @brief  Checks whether the specified USART flag is set or not.
-  * @param  USARTx: Select the USART or the UART peripheral.
-  *   This parameter can be one of the following values:
-  *   USART1, USART2, USART3, UART4 or UART5.
-  * @param  USART_FLAG: specifies the flag to check.
-  *   This parameter can be one of the following values:
-  *     @arg USART_FLAG_CTS:  CTS Change flag (not available for UART4 and UART5)
-  *     @arg USART_FLAG_LBD:  LIN Break detection flag
-  *     @arg USART_FLAG_TXE:  Transmit data register empty flag
-  *     @arg USART_FLAG_TC:   Transmission Complete flag
-  *     @arg USART_FLAG_RXNE: Receive data register not empty flag
-  *     @arg USART_FLAG_IDLE: Idle Line detection flag
-  *     @arg USART_FLAG_ORE:  OverRun Error flag
-  *     @arg USART_FLAG_NE:   Noise Error flag
-  *     @arg USART_FLAG_FE:   Framing Error flag
-  *     @arg USART_FLAG_PE:   Parity Error flag
-  * @retval The new state of USART_FLAG (SET or RESET).
-  */
-FlagStatus USART_GetFlagStatus(USART_TypeDef* USARTx, INT16U USART_FLAG)
+ * @brief  Transmits single data through the USARTx peripheral.
+ * @param  USARTx: Select the USART or the UART peripheral.
+ *   This parameter can be one of the following values:
+ *   USART1, USART2, USART3, UART4 or UART5.
+ * @param  Data: the data to transmit.
+ * @retval None
+ */
+void USART_SendData(USART_TypeDef* USARTx , INT16U Data)
 {
-  FlagStatus bitstatus = RESET;
-  /* Check the parameters */
-  //assert_param(IS_USART_ALL_PERIPH(USARTx));
-  //assert_param(IS_USART_FLAG(USART_FLAG));
-  /* The CTS flag is not available for UART4 and UART5 */
-  if (USART_FLAG == USART_FLAG_CTS)
-  {
-    //assert_param(IS_USART_123_PERIPH(USARTx));
-  }
+#if CPU_TYPE == STM32F103VE
+	/* Transmit Data */
+	while (!(USARTx->SR & USART_FLAG_TXE));
+	USARTx->DR = (Data & (INT16U)0x01FF);
+#endif
+}
+/**
+ * @brief  Checks whether the specified USART flag is set or not.
+ * @param  USARTx: Select the USART or the UART peripheral.
+ *   This parameter can be one of the following values:
+ *   USART1, USART2, USART3, UART4 or UART5.
+ * @param  USART_FLAG: specifies the flag to check.
+ *   This parameter can be one of the following values:
+ *     @arg USART_FLAG_CTS:  CTS Change flag (not available for UART4 and UART5)
+ *     @arg USART_FLAG_LBD:  LIN Break detection flag
+ *     @arg USART_FLAG_TXE:  Transmit data register empty flag
+ *     @arg USART_FLAG_TC:   Transmission Complete flag
+ *     @arg USART_FLAG_RXNE: Receive data register not empty flag
+ *     @arg USART_FLAG_IDLE: Idle Line detection flag
+ *     @arg USART_FLAG_ORE:  OverRun Error flag
+ *     @arg USART_FLAG_NE:   Noise Error flag
+ *     @arg USART_FLAG_FE:   Framing Error flag
+ *     @arg USART_FLAG_PE:   Parity Error flag
+ * @retval The new state of USART_FLAG (SET or RESET).
+ */
+FlagStatus USART_GetFlagStatus(USART_TypeDef* USARTx , INT16U USART_FLAG)
+{
+#if CPU_TYPE == STM32F103VE
+	FlagStatus bitstatus = RESET;
+	/* Check the parameters */
+	//assert_param(IS_USART_ALL_PERIPH(USARTx));
+	//assert_param(IS_USART_FLAG(USART_FLAG));
+	/* The CTS flag is not available for UART4 and UART5 */
+	if (USART_FLAG == USART_FLAG_CTS)
+	{
+		//assert_param(IS_USART_123_PERIPH(USARTx));
+	}
 
-  if ((USARTx->SR & USART_FLAG) != (INT16U)RESET)
-  {
-    bitstatus = SET;
-  }
-  else
-  {
-    bitstatus = RESET;
-  }
-  return bitstatus;
+	if ((USARTx->SR & USART_FLAG) != (INT16U)RESET)
+	{
+		bitstatus = SET;
+	}
+	else
+	{
+		bitstatus = RESET;
+	}
+	return bitstatus;
 #endif
 }

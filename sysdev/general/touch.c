@@ -16,9 +16,11 @@
 #ifdef TSC2046_DEVICE
 #include "../../chip/tsc2046.h"
 #endif
+/*
 #ifdef __DEBUG__
 #include "../package/usart_package.h"
 #endif
+*/
 
 void init_touch(void)
 {
@@ -28,11 +30,13 @@ void init_touch(void)
 	TSC2046_io_init();
  	Read_ADS(&X,&Y);//第一次读取初始化
 #endif
+/*
 #ifdef __DEBUG__
  	printf_num(X,'h');
  	printfs("\r\n");
  	printf_num(Y,'h');
  	printfs("\r\n");
 #endif
+*/
 }
 

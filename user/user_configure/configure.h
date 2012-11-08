@@ -1,6 +1,7 @@
 #ifndef CFG_H__
 #define CFG_H__
 #include "../../libc/cpu_typed.h"
+#define TESTING__
 /**
  *  @file	configure.h
  *  @brief      这个文件是配置doxygen中的分组代码，方便以后对注释文档进行维护与控制一些开关宏。\n
@@ -43,7 +44,7 @@
 
 /**@}*/
 
-//#define __DEBUG__
+#define __DEBUG__
 #define PARAM_CHECK									 /*函数是否开启参数检查*/
 //#define SYSTICK_INT								 /*!< 这个宏为定义的时候，表明systick将用在systick中断中，否则则只为了单纯的轮询延时。 */
 //芯片使用

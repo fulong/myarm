@@ -40,6 +40,14 @@ typedef signed   int            INT32S;                   /*!< Signed   32 bit q
 #define TRUE						  (1)
 #define FALSE						  (0)
 #define NULL						  ((void *)0)
+typedef enum
+{	RESET = 0, SET = !RESET}FlagStatus, ITStatus;
+
+typedef enum
+{	DISABLE = 0, ENABLE = !DISABLE}FunctionalState;
+
+typedef enum
+{	ERROR = 0, SUCCESS = !ERROR}ErrorStatus;
 
 #define     __I     volatile const          /*!< defines 'read only' permissions      */
 #define     __O     volatile                  /*!< defines 'write only' permissions     */

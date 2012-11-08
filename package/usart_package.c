@@ -27,9 +27,13 @@ printfs(const INT8S* str)
 {
 	while (*str)
 	{
+#if CPU_TYPE == STM32F103VE
 		while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
 		;
 		USART_SendData(USART1, *str++);
+#endif
+		while(!(USART_STAT0->UTRSTAT & (1<<2)));
+		USART_DATA0->UTXH = *str++;
 	}
 }
 /**

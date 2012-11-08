@@ -25,6 +25,7 @@
 #endif
 #include "../../package/usart_package.h"
 #include "../../package/tft.h"
+#include "../arm920t//inc/led.h"
 /**
  * @brief  初始化串口1，LED灯的端口
  * @param	none
@@ -41,8 +42,8 @@ void LED_GPIO_Configuration(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	RCC_APB2PeriphClockCmd(
-			RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD
-					| RCC_APB2Periph_GPIOE | RCC_APB2Periph_USART1, ENABLE); /* 使能各个端口时钟，重要！！！*/
+				RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD
+				| RCC_APB2Periph_GPIOE | RCC_APB2Periph_USART1, ENABLE); /* 使能各个端口时钟，重要！！！*/
 
 	/* Configure IO connected to LD1, LD2 and LD3  leds *********************/
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_12 | GPIO_Pin_13;
@@ -81,60 +82,68 @@ void LED_GPIO_Configuration(void)
  */
 void USART_Configuration(USART_TypeDef* USARTx)
 {
-#if CPU_TYPE == STM32F103VE
+	uart0_init( USART_BaudRate_115200);
 	USART_InitTypeDef USART_InitStructure;
-	USART_InitStructure.USART_BaudRate = 115200; //波特率115200
+	USART_InitStructure.USART_BaudRate = USART_BaudRate_115200; //波特率115200
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b; //8位数据
-	USART_InitStructure.USART_StopBits = USART_StopBits_1; //停止位1位
+	USART_InitStructure.USART_StopBits = USART_STOP_1BIT; //停止位1位
 	USART_InitStructure.USART_Parity = USART_Parity_No; //无
-	USART_InitStructure.USART_HardwareFlowControl =
-			USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+#if CPU_TYPE == S3C2440
+	if( USARTx != USART2 ) //在S3C2440中USART2没有流控。
+	{
+#endif
+		USART_InitStructure.USART_HardwareFlowControl =
+					USART_HardwareFlowControl_None;
+#if CPU_TYPE == S3C2440
+	}
+#endif
+	USART_InitStructure.USART_Mode = USART_Infrared_MODE_Disable; //正常模式，非红外模式
 	USART_Init(USARTx, &USART_InitStructure);
-	USART_Cmd(USARTx, ENABLE);
+#if CPU_TYPE == STM32F103VE
+				USART_Cmd(USARTx, ENABLE);
 #endif
 }
 void _main(void)
 {
 	LED_GPIO_Configuration();
-	USART_Configuration(USART0);
+	USART_Configuration( USART0);
 #ifdef __DEBUG__
-	printfs("this is in init fuction.\r\n");
-	printfs("usart1's initation has compeleted.\r\n");
-	printfs("three lights can bright.\r\n");
+	printfs( "this is be in init fuction.\r\n");
+	printfs( "usart1's initation has compeleted.\r\n");
+	printfs( "three lights can bright.\r\n");
 #endif
 	LED_Init();
 #ifdef __DEBUG__
-	printfs("open all the led.\r\n");
+	printfs( "open all the led.\r\n");
 #endif
 #if CPU_TYPE == STM32F103VE
 	systick_init();
 #endif
 #ifdef __DEBUG__
-	printfs("system ticket clock's initation has compeleted.\r\n");
-	printfs("\r\n");
-	printfs("now into the tft's initation.\r\n");
+	printfs( "system ticket clock's initation has compeleted.\r\n");
+	printfs( "\r\n");
+	printfs( "now into the tft's initation.\r\n");
 #endif
 #if TFT_SIZE != NO_TFT
 	LCD_Init();
 #endif
 //	set_orgin(480, 272);
 #ifdef __DEBUG__
-/*
+	/*
 	 printfs("\r\n");
 	 char * a = "我AA";
 	 for(;(*a)!=0;){
 	 printf_num(*a++,'h');
 	 }
 	 printfs("\r\n");
-*/
+	 */
 #endif
-/*
-	init_touch();
-#ifdef __DEBUG__
-	printfs("touching's initation has compeleted.\r\n");
-#endif
-*/
+	/*
+	 init_touch();
+	 #ifdef __DEBUG__
+	 printfs("touching's initation has compeleted.\r\n");
+	 #endif
+	 */
 
 }
 

@@ -271,6 +271,7 @@ void Unicode_Index_MyFont(INT8U* font, INT32U* myfont_index)
 				* (High_Byte_Index[myutf8.High_Byte_Index]
 						* Low_Byte_Index[myutf8.Low_Byte_Index]));
 #endif
+/*
 #ifdef __DEBUG__
 		printfs("myutf8.High_Byte_Index :");
 		printf_num(myutf8.High_Byte_Index, 'h');
@@ -300,6 +301,7 @@ void Unicode_Index_MyFont(INT8U* font, INT32U* myfont_index)
 		printf_num(High_Byte_Index[myutf8.High_Byte_Index], 'h');
 		printfs("\r\n");
 #endif
+*/
 	}
 }
 

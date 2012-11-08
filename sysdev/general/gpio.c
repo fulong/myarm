@@ -1,4 +1,11 @@
+#include "../../user/user_configure/configure.h"
+#if CPU_TYPE == STM32F103VE
 #include "../cortex-m3/inc/gpio.h"
+#endif
+#if CPU_TYPE == S3C2440
+
+#endif
+#if CPU_TYPE == STM32F103VE
 /**
   * @brief  按照GPIO_InitStruct(结构体)的特定参数初始化GPIO部件
   * @param  GPIOx：x可为A到G来选择特定的GPIO设备，
@@ -89,3 +96,4 @@ void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct)
     GPIOx->CRH = tmpreg;
   }
 }
+#endif

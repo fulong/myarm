@@ -99,15 +99,15 @@
 #define NFCMD		(*(__IO INT32U *)0x4E000008)      //NAND Flash command
 #define NFADDR		(*(__IO INT32U *)0x4E00000C)      //NAND Flash address
 #define NFDATA		(*(__IO INT32U *)0x4E000010)      //NAND Flash data
-#define NFDATA8	(*(__IO INT32U char *)0x4E000010)     //NAND Flash data
+#define NFDATA8		(*(__IO  INT8U *)0x4E000010)     //NAND Flash data
 #define NFMECCD0	(*(__IO INT32U *)0x4E000014)      //NAND Flash ECC for Main Area
 #define NFMECCD1	(*(__IO INT32U *)0x4E000018)
-#define NFSECCD	(*(__IO INT32U *)0x4E00001C)		//NAND Flash ECC for Spare Area
+#define NFSECCD		(*(__IO INT32U *)0x4E00001C)		//NAND Flash ECC for Spare Area
 #define NFSTAT		(*(__IO INT32U *)0x4E000020)		//NAND Flash operation status
 #define NFESTAT0	(*(__IO INT32U *)0x4E000024)
 #define NFESTAT1	(*(__IO INT32U *)0x4E000028)
-#define NFMECC0	(*(__IO INT32U *)0x4E00002C)
-#define NFMECC1	(*(__IO INT32U *)0x4E000030)
+#define NFMECC0		(*(__IO INT32U *)0x4E00002C)
+#define NFMECC1		(*(__IO INT32U *)0x4E000030)
 #define NFSECC		(*(__IO INT32U *)0x4E000034)
 #define NFSBLK		(*(__IO INT32U *)0x4E000038)		//NAND Flash Start block address
 #define NFEBLK		(*(__IO INT32U *)0x4E00003C)		//NAND Flash End block address
@@ -151,26 +151,6 @@
 #define UART0_BASE 					0x50000000
 #define UART1_BASE 					0x50004000
 #define UART2_BASE 					0x50008000
-typedef struct
-{
-	__IO INT32U ULCON; /*!< uart线路控制 0*/
-	__IO INT32U UCON; /*!< uart控制 4*/
-	__IO INT32U UFCON; /*!< uart FIFO控制 8*/
-	__IO INT32U UMCON; /*!< uart modem控制 C*/
-} USART_TypeDef;
-typedef struct
-{
-	__IO INT32U UTRSTAT; /*!< uart Tx/Rx状态 10*/
-	__IO INT32U UERSTAT; /*!< uart Rx错误状态 14*/
-	__IO INT32U UFSTAT; /*!< uart FIFO状态 18*/
-	__IO INT32U UMSTAT; /*!< usart modem状态 1c*/
-} USARTSTAT_TypeDef;
-typedef struct
-{
-	__IO INT8U UTXH; /*!< usart 发送保持 20*/
-	INT8U RESERVE1;
-	INT16U RESERVE2;__IO INT8U URXH; /*!< usart 接受缓冲器 24*/
-} USARTDATA_TypeDef;
 #define UBRDIV0  (*(__IO INT32U *)(UART0_BASE+0x28))	/*!< usart 波特率分频器 28*/
 #define UBRDIV1  (*(__IO INT32U *)(UART1_BASE+0x28))	/*!< usart 波特率分频器 28*/
 #define UBRDIV2  (*(__IO INT32U *)(UART2_BASE+0x28))	/*!< usart 波特率分频器 28*/
@@ -183,17 +163,6 @@ typedef struct
 #define UART1STAT_BASE				(UART1_BASE+0x10)
 #define UART2STAT_BASE				(UART2_BASE+0x10)
 
-extern USART_TypeDef* USART0;/*!< 控制配置usart0的变量*/
-extern USART_TypeDef* USART1;/*!< 控制配置usart1的变量*/
-extern USART_TypeDef* USART2;/*!< 控制配置usart2的变量*/
-
-extern USARTDATA_TypeDef* USART_DATA0;/*!< usart0数据发送接受*/
-extern USARTDATA_TypeDef* USART_DATA1;/*!< usart1数据发送接受*/
-extern USARTDATA_TypeDef* USART_DATA2;/*!< usart2数据发送接受*/
-
-extern USARTSTAT_TypeDef* USART_STAT0;/*!< 查询usart0的状态*/
-extern USARTSTAT_TypeDef* USART_STAT1;/*!< 查询usart0的状态*/
-extern USARTSTAT_TypeDef* USART_STAT2;/*!< 查询usart0的状态*/
 
 // PWM TIMER
 #define TCFG0  (*(__IO INT32U *)0x51000000)	//Timer 0 configuration

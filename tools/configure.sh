@@ -3,7 +3,7 @@
 # @file : configure.sh
 # @brief: 项目代码最初使用的时候必须先运行这个脚本，配置好编译器，体系结构等等
 ######################全局变量######################################
-if ! [ -f "configure_type.mk" ];then
+if ! [ -f "configure_type.mk"  ] ;then
 echo "请正确使用configure.sh."
 echo "指令：make configure"
 exit 1
@@ -18,17 +18,24 @@ LDS_BAK=lds_bak #链接脚本备份文件所在的文件夹
 log_dir=log #日志文件所保存的文件夹
 proj_name= #项目的名字
 OS= #选择的RT系统
-use=$(cat configure_type.mk  | grep "configure_type"| sed 's/.*=//g')
+use=$(cat  configure_type.mk  | grep "configure_type="| sed 's/.*=//g')
 
-case $use in
+case "$use" in
 	"prj_configure" )
 		mk_name=configure.mk
-		;;
+		root_dir=.
+				dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
+				;;
 	"setting_tools_configure" )
+		proj_name=setting
+		root_dir=tools_src/setting/
 		mk_name=setting.mk
+		arch_select=x86
+		exe_dir=tools
 		;;
 		* )
 		echo "mk文件的名字有误"
+		echo "$use"
 		exit 1
 		;;
 esac
@@ -38,9 +45,6 @@ trap 'rm -rf configure_type.mk;exit 1' INT
 
 source tools/lib.sh
 
-dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
-#################总共的源文件#####################################
-#################总共的源文件#####################################
 #################交叉编译器版本选择#####################################
 CrossCompiler_Select()
 {
@@ -203,11 +207,11 @@ OS_Select()
 		OS=OS_NO_USE
 	fi
 	echo "OS=$OS">> $mk_name
-		Source_Path $OS
+		Source_Path "$OS"
 }
 ####################项目是否选用OS###################################
 ####################编译环境配置###################################
-case $use in
+case "$use" in
 	"prj_configure" )
 		ProjectName
 		CrossCompiler_Select
@@ -253,7 +257,7 @@ ASFLAGS="$ASFLAGS -O2"
 fi
 #根据CPU型号加上相应的编译选项
 if [ "$arch_select" = "armv7-m" ];then
-case $cpu_select in
+case "$cpu_select" in
   "cortex-m3" )
 	echo "#添加$cpu_select相关标志" >> $mk_name
       echo 'CFLAGS += -march=$(ARCH) -mthumb -mcpu=$(CPU) ' >> $mk_name
@@ -284,12 +288,12 @@ case $cpu_select in
 esac
 fi
 if [ "$arch_select" = "armv4t" ];then
-case $cpu_select in
+case "$cpu_select" in
   "arm920t" )
 	echo "#添加$cpu_select相关标志" >> $mk_name
       echo 'CFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> $mk_name
       echo 'ASFLAGS += -march=$(ARCH) -mcpu=$(CPU)' >> $mk_name
-      echo 'LD_FLAGS = -T$(exe_dir)/$(CPU).lds' >> $mk_name
+      echo 'LD_FLAGS += -T$(exe_dir)/$(CPU).lds' >> $mk_name
 	echo "#添加$cpu_select相关标志" >> $mk_name
       CFLAGS="$CFLAGS -march=$arch_select -mcpu=$cpu_select"
       ASFLAGS="$ASFLAGS -march=$arch_select -mcpu=$cpu_select"
@@ -305,14 +309,14 @@ esac
 fi
 		;;
 	"setting_tools_configure" )
-		echo 'proj_name=setting' > $mk_name
+		echo "proj_name=$proj_name" > $mk_name
 		;;
 		* )
 		echo "mk文件的名字有误"
 		exit 1
 		;;
 esac
-
+echo 'configure_mk=YES' >> $mk_name
 echo "RM=rm -rf">> $mk_name
 
 echo "配置完成。"
