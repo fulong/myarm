@@ -23,12 +23,14 @@ case "$use" in
 	"prj_configure" )
 		root_dir=.
 		mk_name=configure.mk
+		configure_mk=configure_mk
 		log_dir=${root_dir}/log #日志文件所保存的文件夹
 		dialog --title "configure" --msgbox "项目代码最初使用的时候运行的一个脚本，配置好编译环境，体系结构等等" 10 30 
 				;;
 	"setting_tools_configure" )
 		root_dir=tools_src/setting
 		mk_name=setting.mk
+		configure_mk=setting_mk
 		log_dir=${root_dir}/log
 		;;
 		* )
@@ -230,7 +232,7 @@ case "$use" in
 		exe_dir=tools
 		echo "proj_name=$proj_name" > $mk_name
 		echo "CROSS_COMPILER=$CROSS_COMPILER" >> $mk_name
-		echo "arch_select=$arch_select" >> $mk_name
+		echo "ARCH=$arch_select" >> $mk_name
 		dir4exe
 		echo "log_dir=${log_dir}" >> $mk_name
 		NoARCH_AND_NoOS_Source_Path
@@ -325,13 +327,19 @@ case "$cpu_select" in
     ;;
 esac
 fi
+if [ "$arch_select" = "x86" ];then
+	echo "~~~还未有其他的FLAGS项。~~~~"
+fi
+#*******************工具选项配置******************************************
 
-echo 'configure_mk=YES' >> $mk_name
+#configure文件标志设置，表示文件生成成功。
+echo "$configure_mk=YES" >> $mk_name
+############创建工程的日志文件。############
 touch $log_dir/obj.log $log_dir/depend.log
 if ! [ -f "$log_dir/${proj_name}.log" ];then 
 touch $log_dir/${proj_name}.log
 fi
-
+########################################
 echo "RM=rm -rf">> $mk_name
 
 echo "配置完成。"

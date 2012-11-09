@@ -15,7 +15,7 @@ ifeq "$(configure_type)" "setting_tools_configure"
 sinclude setting.mk
 endif
 
-ifeq "$(configure_type_mk)$(configure_mk)" "YESYES" #判断两个配置文件是否存在.
+ifeq "$(configure_type_mk)$(configure_mk)$(setting_mk)" "YESYES" #判断两个配置文件是否存在.
 configure_on=YES
 else
 configure_on=NO
@@ -78,7 +78,7 @@ ifneq "$(configure_type_mk)$(configure_mk)" "YESYES"
 	@./tools/configure.sh
 endif
 install:
-	@./tools/install2arm.sh
+	@./tools/install.sh "$(configure_type)" "$(ARCH)"
 	@echo "安装完成" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 ifeq "$(configure_on)" "YES"
@@ -90,8 +90,9 @@ setting:
 	@./tools/setting.bin
 compiling4setting:
 	@./tools/configure_type.sh "$(configure_type_mk)" configure_type=setting_tools_configure
+ifneq "$(configure_type_mk)$(setting_mk)" "YESYES"
 	@./tools/configure.sh
-
+endif
 allclean:clean dclean
 clean :
 	${RM}  ${log_dir}/obj.log ${OBJ} ${exe_dir}/$(proj_name).dis
