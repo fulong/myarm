@@ -9,7 +9,6 @@ echo "指令：make configure"
 exit 1
 fi
 ######################全局变量######################################
-temp_file=/tmp/cross_configure #暂存文件
 cross_select= #编译器类型存储
 arch_select= #指令集选型
 cpu_select= #CPU内核选型
@@ -181,34 +180,6 @@ dir4exe()
 	#done
 #}
 ####################自动生成的日志文件文件所在的路径####################################
-####################项目是否选用OS###################################
-OS_Select()
-{
-	local OS_VAR='ucos-ii\nRT-Thread\n' #可供选择的指令集
-	local flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
-	while [ "$flag" != "0" ];do
-	dialog --clear
-	dialog --title "OS版本选择" --inputbox "请输入你当前使用的OS名称。你可以选择的OS(目前支持).\n$OS_VAR" 20 50  2> $temp_file
-	
-	OS=$(cat $temp_file)
-	flag=0
-	if [ -z "$OS" ];then
-		dialog --title "再次确认" --yesno "你将不使用OS，你确定要这样做吗？" 10 30
-		flag=$?
-		if [ "$flag" = "0" ];then
-			OS="NO_USE"
-		fi
-	elif [ "$OS" != "ucos-ii" ] && [ "$OS" != "RT-Thread" ] ;then
-		dialog --title "你可以选择的OS(目前支持),请输入正确的OS名称"  --msgbox "$OS_VAR" 20 50
-		flag=1
-	fi
-	done
-	if [ "$OS" = "NO_USE" ];then
-		OS=OS_NO_USE
-	fi
-	echo "OS=$OS">> $mk_name
-		Source_Path "$OS"
-}
 ####################项目是否选用OS###################################
 ####################编译环境配置###################################
 case "$use" in

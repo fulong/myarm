@@ -82,7 +82,7 @@ install:
 	@echo "安装完成" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 ifeq "$(configure_on)" "YES"
-update4prj: #这个目标晚点会将其变成能服务于每一个项目
+update: #这个目标晚点会将其变成能服务于每一个项目
 	@echo "更新目录,文件变化" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log 
 	@./tools/update.sh configure_type\=$(configure_type) CPU\=$(CPU)

@@ -1,10 +1,11 @@
 #!/bin/bash
 #configure.sh
+temp_file=/tmp/cross_configure #暂存文件
 
 ####################项目的源码目录汇总###################################
 #目录中只包含了没有系统，跟CPU无关的代码目录
 OS_dir="/OS/"
-ARCH_Sum="/cortex-m3/ /arm920t/" #这个变量表示函数NoARCH_AND_NoOS_Source_Path中消除的文件夹
+ARCH_Sum="/cortex-m3 /arm920t" #这个变量表示函数NoARCH_AND_NoOS_Source_Path中消除的文件夹
 extend_src="/tools_src/"
 NoARCH_AND_NoOS_Source_Path()
 {
@@ -62,40 +63,7 @@ if [ "$1" != "NO_USE" ];then
 	echo "#############增加$1相关源文件与目录####################" >>$mk_name
 fi
 }
-####################项目的自定义源码目录###################################
 #configure.sh
-
-#update.sh
-#@function_name: _update
-#更新configure的某行
-#$1:要更新的行
-#$2:更新的内容
-#$3:在上部函数中进去此函数的次数，如非0，则有加号
-#$4:取值为：VPATH，Ssources,Csources
-_update()
-{
-	local row="$1"
-	local update_item="$3"
-	local content=$(echo "$2" | sed 's/\//\\\//g' | sed 's/\./\\\./g')
-	local type="$4"
-	local operate=
-	if [ "$type" = "NoARCH" ];then
-		for TEMP in $ARCH_Sum $OS_dir $extend_src
-		do
-			content=$(echo "$content" | grep -v "$TEMP")
-		done
-		operate="="
-	else
-		content=$(echo "$content" | grep "$type")
-		operate="+="
-	fi
-		content=$(echo -n $content)
-		echo "${row}d" > sed.sh
-		echo "`expr ${row} + 1`i${update_item}${operate}${content}" >> sed.sh
-		sed -i -f sed.sh configure.mk
-		rm -f sed.sh	
-}
-#update.sh
 ######################定义项目名称######################################
 ProjectName()
 {
@@ -119,3 +87,32 @@ ProjectName()
 	done
 }
 ######################定义项目名称######################################
+####################项目是否选用OS###################################
+OS_Select()
+{
+	local OS_VAR='ucos-ii\nRT-Thread\n' #可供选择的指令集
+	local flag=1 #初始化这个自动变量，使下面的能正确使用这个变量
+	while [ "$flag" != "0" ];do
+	dialog --clear
+	dialog --title "OS版本选择" --inputbox "请输入你当前使用的OS名称。你可以选择的OS(目前支持).\n$OS_VAR" 20 50  2> $temp_file
+	
+	OS=$(cat $temp_file)
+	flag=0
+	if [ -z "$OS" ];then
+		dialog --title "再次确认" --yesno "你将不使用OS，你确定要这样做吗？" 10 30
+		flag=$?
+		if [ "$flag" = "0" ];then
+			OS="NO_USE"
+		fi
+	elif [ "$OS" != "ucos-ii" ] && [ "$OS" != "RT-Thread" ] ;then
+		dialog --title "你可以选择的OS(目前支持),请输入正确的OS名称"  --msgbox "$OS_VAR" 20 50
+		flag=1
+	fi
+	done
+	if [ "$OS" = "NO_USE" ];then
+		OS=OS_NO_USE
+	fi
+	echo "OS=$OS">> $mk_name
+		Source_Path "$OS"
+}
+####################项目是否选用OS###################################
