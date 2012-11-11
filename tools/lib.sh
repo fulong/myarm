@@ -40,7 +40,7 @@ fi
 #parm:目前有
 #		1.cortex-m3,增添cortex-m3源码目录跟cortex-m3源码
 #		2.OS,增添OS源码目录跟OS源码
-#		3.自定义添加文件
+#		3.自定义添加文件,目录
 #note:只支持一个参数
 Source_Path()
 {

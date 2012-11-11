@@ -229,13 +229,16 @@ case "$use" in
 		proj_name=setting
 		CROSS_COMPILER=
 		arch_select=x86
+		cpu_select=x86
 		exe_dir=tools
 		echo "proj_name=$proj_name" > $mk_name
 		echo "CROSS_COMPILER=$CROSS_COMPILER" >> $mk_name
 		echo "ARCH=$arch_select" >> $mk_name
+		echo "CPU=$cpu_select" >> $mk_name
 		dir4exe
 		echo "log_dir=${log_dir}" >> $mk_name
 		NoARCH_AND_NoOS_Source_Path
+		Source_Path $cpu_select
 		;;
 		* )
 		echo "mk文件的名字有误"

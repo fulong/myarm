@@ -1,13 +1,29 @@
 #!/bin/bash
-
+export $1
+export $2
+# @parm $1,传递的是工程所在的状态。
 source tools/lib.sh
 #update_item_order="VPATH Csources Ssources"
-if ! [ -f "configure.mk" ] ;then
-	echo "configure.mk不存在，请创建。"
+if [ -z "$configure_type" ] || [ -z "$CPU" ];then
+	echo "MK配置不对，请重建。"
 	exit 1
 fi
+case "$configure_type" in
+	"prj_configure" )
+	mk_name=configure.mk
+		;;
+	"setting_tools_configure" )
+	mk_name=setting.mk
+		;;
+	"*")
+	echo "工程状态有误"
+	exit 1
+	;;
+esac
+
 clear_file()
 {
+echo "删除更新前的生成的.d,.o文件"
 find | grep '\.d$' | xargs rm -f
 find | grep '\.o$' | xargs rm -f
 }
@@ -16,7 +32,7 @@ item_update()
 	local update_item=(Csources Ssources VPATH)
 	local times=0;
 	local content=
-	local update_row=$(echo `cat configure.mk -n  | sed 's/^[ ]*//g' | grep "$1" | grep '#' | cut -s -f 1 | head -n1`)
+	local update_row=$(echo `cat $mk_name -n  | sed 's/^[ ]*//g' | grep "$1" | grep '#' | cut -s -f 1 | head -n1`)
 	echo "更新$1相关信息"
 #	echo "${update_item[2]}"
 	update_row=$(expr "$update_row" + "1") 
@@ -40,7 +56,7 @@ item_update()
 	
 }
 clear_file
-item_update "NoARCH"
-item_update "`cat configure.mk | grep "OS=" | sed 's/OS=//g'`"
-item_update "`cat configure.mk | grep "CPU=" | sed 's/CPU=//g'`"
+#item_update "NoARCH"
+#item_update "`cat configure.mk | grep "OS=" | sed 's/OS=//g'`"
+#item_update "`cat configure.mk | grep "CPU=" | sed 's/CPU=//g'`"
 exit 0

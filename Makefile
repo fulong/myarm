@@ -73,23 +73,23 @@ endif
 	@date >> ${log_dir}/depend.log
 endif #ifeq "$(configure_on)" "YES"
 configure:
-	@./tools/configure_type.sh "$(configure_type_mk)" configure_type=prj_configure
+	@./tools/configure_type.sh "$(configure_type_mk)" configure_type\=prj_configure
 ifneq "$(configure_type_mk)$(configure_mk)" "YESYES"
 	@./tools/configure.sh
 endif
 install:
-	@./tools/install.sh "$(configure_type)" "$(ARCH)"
+	@./tools/install.sh configure_type\=$(configure_type) "$(ARCH)"
 	@echo "安装完成" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log
 ifeq "$(configure_on)" "YES"
 update4prj: #这个目标晚点会将其变成能服务于每一个项目
 	@echo "更新目录,文件变化" | tee -a ${log_dir}/$(proj_name).log
 	@date >> ${log_dir}/$(proj_name).log 
-	@./tools/update.sh
+	@./tools/update.sh configure_type\=$(configure_type) CPU\=$(CPU)
 setting:
 	@./tools/setting.bin
 compiling4setting:
-	@./tools/configure_type.sh "$(configure_type_mk)" configure_type=setting_tools_configure
+	@./tools/configure_type.sh "$(configure_type_mk)" configure_type\=setting_tools_configure
 ifneq "$(configure_type_mk)$(setting_mk)" "YESYES"
 	@./tools/configure.sh
 endif
@@ -115,7 +115,7 @@ ifeq "$(configure_type)" "prj_configure"
 	${RM}  *.mk *.lds 
 endif
 ifeq "$(configure_type)" "setting_tools_configure"
-	@./tools/configure_type.sh "$(configure_type_mk)" configure_type=prj_configure
+	@./tools/configure_type.sh "$(configure_type_mk)" configure_type\=prj_configure
 endif	
 endif #ifeq "$(configure_on)" "YES"
 

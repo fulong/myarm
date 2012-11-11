@@ -3,6 +3,7 @@
 # @brief 安装bin文件到工程中，或者将bin文件烧入到设备中。
 # @parm $1,传递的是工程所在的状态。
 # @parm $2,传递的是工程所在的处理器架构，从而可以选择不一样的处理bin文件的方式
+export $1
 echo "安装中........"
 if [ -z "$1" ] || [ -z "$2" ];then
 	echo "$1"
@@ -10,7 +11,6 @@ if [ -z "$1" ] || [ -z "$2" ];then
 echo "Error!!Please config this project."
 exit 1
 else
-	configure_type=$1;
 	ARCH=$2;
 fi
 case "$configure_type" in
